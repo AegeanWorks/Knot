@@ -162,8 +162,14 @@ std::string render_violations_json(const std::vector<Violation>& violations) {
         if (i) os << ",";
         os << "\n    {\"kind\": \"" << kind_name(violation.kind) << "\", \"subject\": \"";
         for (char c : violation.subject) {
-            if (c == '"' || c == '\\') os << '\\' << c;
-            else os << c;
+            switch (c) {
+                case '"': os << "\\\""; break;
+                case '\\': os << "\\\\"; break;
+                case '\n': os << "\\n"; break;
+                case '\r': os << "\\r"; break;
+                case '\t': os << "\\t"; break;
+                default: os << c; break;
+            }
         }
         os << "\", \"value\": " << violation.value << ", \"limit\": " << violation.limit << "}";
     }
