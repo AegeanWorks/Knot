@@ -8,6 +8,7 @@
 #include "core/impact.hpp"
 #include "core/ignore.hpp"
 #include "core/path.hpp"
+#include "core/policy.hpp"
 #include "core/report.hpp"
 #include "files.hpp"
 
@@ -41,6 +42,16 @@ knot::core::IgnoreRules load_rules(const knot::shell::Command& cmd) {
     knot::core::IgnoreRules user = knot::core::parse_ignore(text);
     rules.insert(rules.end(), user.begin(), user.end());
     return rules;
+}
+
+knot::core::Policy load_policy(const knot::shell::Command& cmd) {
+    const std::string path = cmd.policy_file.empty()
+                                 ? cmd.root + "/.knot-policy"
+                                 : cmd.policy_file;
+    if (!knot::shell::file_exists(path)) return knot::core::Policy{};
+    std::string text;
+    if (!knot::shell::read_text_file(path, text)) return knot::core::Policy{};
+    return knot::core::parse_policy(text);
 }
 
 }  // namespace
@@ -100,6 +111,37 @@ int main(int argc, char** argv) {
 
     // I/O stops here. Everything below is pure computation.
     const knot::core::Analysis analysis = knot::core::analyze(std::move(docs));
+
+    if (cmd.kind == knot::shell::CommandKind::Check) {
+        const knot::core::Policy policy = load_policy(cmd);
+        knot::core::DiffReport diff;
+        if (!policy.baseline.empty()) {
+            std::string baseline_path = policy.baseline;
+            if (baseline_path.find(':') == std::string::npos && baseline_path[0] != '/') {
+                baseline_path = cmd.root + "/" + baseline_path;
+            }
+            std::string baseline_text;
+            if (!knot::shell::read_text_file(baseline_path, baseline_text)) {
+                knot::shell::write_stderr("knot: cannot read baseline: " + baseline_path + "\n");
+                return 3;
+            }
+            knot::core::Snapshot before;
+            std::string error;
+            if (!knot::core::snapshot_from_json(baseline_text, before, error)) {
+                knot::shell::write_stderr("knot: invalid baseline: " + error + "\n");
+                return 2;
+            }
+            diff = knot::core::diff_snapshots(
+                before, knot::core::snapshot_from_analysis(analysis));
+        }
+        const std::vector<knot::core::Violation> violations =
+            knot::core::evaluate_policy(analysis, policy, diff);
+        const std::string rendered = cmd.format == "json"
+                                         ? knot::core::render_violations_json(violations)
+                                         : knot::core::render_violations_text(violations);
+        if (!knot::shell::write_stdout(rendered)) return 3;
+        return violations.empty() ? 0 : 1;
+    }
 
     if (cmd.kind == knot::shell::CommandKind::Graph) {
         const std::string rendered = cmd.format == "mermaid"

@@ -30,6 +30,7 @@ std::string usage_text() {
            "  knot why <dir> <header> [--from <file>] [--format text|json]\n"
            "  knot impact <dir> <header> [--format text|json]\n"
            "  knot graph <dir> [--format dot|mermaid]\n"
+           "  knot check <dir> [--policy <file>] [--format text|json]\n"
            "  knot diff --baseline <file> --current <dir> [--format text|json]\n"
            "                  [--fail-on-regression]\n"
            "  knot demo\n"
@@ -64,6 +65,7 @@ Command parse_args(int argc, char** argv) {
     else if (sub == "diff") cmd.kind = CommandKind::Diff;
     else if (sub == "impact") cmd.kind = CommandKind::Impact;
     else if (sub == "graph") cmd.kind = CommandKind::Graph;
+    else if (sub == "check") cmd.kind = CommandKind::Check;
     else {
         cmd.error = "unknown subcommand: " + sub;
         return cmd;
@@ -91,6 +93,7 @@ Command parse_args(int argc, char** argv) {
             cmd.fail_on_regression = true;
         } else if (flag == "--format" || flag == "--top" || flag == "--from" ||
                    flag == "--baseline" || flag == "--current" || flag == "--ignore" ||
+                   flag == "--policy" ||
                    flag == "--fail-on-cost" || flag == "--fail-on-hotspot") {
             if (++index >= argc) {
                 cmd.error = flag + " needs a value";
@@ -126,6 +129,8 @@ Command parse_args(int argc, char** argv) {
                 cmd.baseline = value;
             } else if (flag == "--ignore") {
                 cmd.ignore_file = value;
+            } else if (flag == "--policy") {
+                cmd.policy_file = value;
             } else if (flag == "--current") {
                 cmd.root = value;
                 current_seen = true;

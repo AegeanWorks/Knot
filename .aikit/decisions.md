@@ -39,3 +39,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: Scans of real repositories included generated and vendored code because the skip list was hardcoded; there was no way to scope an analysis to owned code.
 - **Decision**: A pure glob_step state machine supports '*', '?', '**', directory rules and '!' negation with last-match-wins semantics; parse_ignore/is_ignored live in the core, while files.cpp applies them to paths relative to the scan root. Defaults (.git/, .aikit/, node_modules/, build/) are rules and can be negated.
 - **Consequences**: Every subcommand now sees the same scoped tree; a fixture smoke test showed three files without the rule file and two with it; 13 new checks cover glob semantics and negation; no third-party dependency was added.
+
+### ADR-005: Add a repository-owned CI policy via knot check
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: CI runners previously had to remember a changing set of CLI flags, so a project's coupling policy was not versioned with its code.
+- **Decision**: A pure parse_policy/evaluate_policy model reads a small key=value .knot-policy file and produces a sorted violation list; 'knot check <dir>' applies it together with the ignore rules and an optional baseline, exiting 1 on any violation.
+- **Consequences**: One stable CI command with a versioned policy; a fixture with a two-header cycle produced one violation and exit 1, while a clean tree produced zero and exit 0; 13 new checks bring the suite to 159; no new dependency or I/O path was introduced.

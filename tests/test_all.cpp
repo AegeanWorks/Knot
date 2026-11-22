@@ -11,6 +11,7 @@
 #include "core/json.hpp"
 #include "core/lexer.hpp"
 #include "core/path.hpp"
+#include "core/policy.hpp"
 #include "core/report.hpp"
 #include "shell/cli.hpp"
 
@@ -439,6 +440,58 @@ void test_cli_ignore() {
     CHECK(c.kind == CommandKind::Scan && c.ignore_file == ".knotignore" && c.error.empty());
 }
 
+void test_policy() {
+    Policy p = parse_policy("# ci policy\nfail_on_cycle = false\nmax_cost = 3\n"
+                            "max_hotspot = 2\nbaseline = base.json\n");
+    CHECK(!p.fail_on_cycle);
+    CHECK(p.max_cost == 3 && p.max_hotspot == 2);
+    CHECK(p.baseline == "base.json");
+    CHECK(parse_policy("fail_on_cycle = true").fail_on_cycle);
+    CHECK(parse_policy("max_cost = nope").max_cost == 0);
+
+    std::vector<SourceDoc> docs{
+        {"a.hpp", "#include \"b.hpp\"\n"},
+        {"b.hpp", "#include \"a.hpp\"\n"},
+        {"app.cpp", "#include \"a.hpp\"\n"}};
+    Analysis a = analyze(docs);
+    Policy strict;
+    strict.fail_on_cycle = true;
+    strict.max_cost = 1;
+    std::vector<Violation> violations = evaluate_policy(a, strict, DiffReport{});
+    CHECK(violations.size() >= 2);
+    bool saw_cycle = false;
+    bool saw_cost = false;
+    for (const auto& v : violations) {
+        if (v.kind == ViolationKind::Cycle) saw_cycle = true;
+        if (v.kind == ViolationKind::Cost) saw_cost = true;
+    }
+    CHECK(saw_cycle && saw_cost);
+    CHECK(evaluate_policy(a, Policy{false, 0, 0, ""}, DiffReport{}).empty());
+
+    DiffReport regression;
+    regression.regressions = true;
+    DiffEntry entry;
+    entry.kind = DiffEntry::Kind::CostUp;
+    regression.entries.push_back(entry);
+    std::vector<Violation> with_regression = evaluate_policy(a, Policy{false, 0, 0, ""}, regression);
+    CHECK(with_regression.size() == 1);
+    CHECK(with_regression[0].kind == ViolationKind::Regression);
+    CHECK(render_violations_text(violations).find("violation(s)") != std::string::npos);
+    CHECK(render_violations_json(with_regression).find("\"kind\": \"regression\"") != std::string::npos);
+}
+
+void test_cli_policy() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* check_cmd = const_cast<char*>("check");
+    char* dir = const_cast<char*>("src");
+    char* policy = const_cast<char*>("--policy");
+    char* file = const_cast<char*>(".knot-policy");
+    char* argv[] = {argv0, check_cmd, dir, policy, file};
+    Command c = parse_args(5, argv);
+    CHECK(c.kind == CommandKind::Check && c.policy_file == ".knot-policy" && c.error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -465,6 +518,8 @@ int main() {
     test_cli_wave3();
     test_ignore_rules();
     test_cli_ignore();
+    test_policy();
+    test_cli_policy();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }
