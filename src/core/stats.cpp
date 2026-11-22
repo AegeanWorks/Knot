@@ -14,6 +14,21 @@ bool ends_with(const std::string& value, const std::string& suffix) {
            value.compare(value.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
+std::string json_escape(const std::string& value) {
+    std::string out;
+    for (char c : value) {
+        switch (c) {
+            case '"': out += "\\\""; break;
+            case '\\': out += "\\\\"; break;
+            case '\n': out += "\\n"; break;
+            case '\r': out += "\\r"; break;
+            case '\t': out += "\\t"; break;
+            default: out.push_back(c); break;
+        }
+    }
+    return out;
+}
+
 bool is_translation_unit(const std::string& path) {
     return ends_with(path, ".cpp") || ends_with(path, ".cc") || ends_with(path, ".cxx");
 }
@@ -90,7 +105,7 @@ std::string render_stats_json(const Stats& stats) {
        << ",\n  \"deepest_chain\": [";
     for (std::size_t i = 0; i < stats.deepest_chain.size(); ++i) {
         if (i) os << ", ";
-        os << "\"" << stats.deepest_chain[i] << "\"";
+        os << "\"" << json_escape(stats.deepest_chain[i]) << "\"";
     }
     os << "]\n}\n";
     return os.str();
