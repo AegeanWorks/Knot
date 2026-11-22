@@ -26,5 +26,11 @@
   "ui_kind": "library",
   "ui_evidence": [],
   "ui_checked_at": "2026-11-22",
-  "ui_source": "detected"
+  "ui_source": "detected",
+  "archived": true,
+  "archived_at": "2026-11-22",
+  "archive_reason": "Testbed for AIKit itself: used to validate the full-history Reforge host-review, repair and delivery workflow end to end (32 commits, 264 hunks attested, 17 fixes, 710 checks). No further development planned.",
+  "archive_repo": "AegeanWorks/Knot",
+  "archive_description": "[ARCHIVED] Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, reports the reverse blast radius of changing a header, diffs a tree against a recorded baseline...",
+  "archive_origin": "projects/knot"
 }

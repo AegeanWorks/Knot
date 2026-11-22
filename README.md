@@ -8,6 +8,8 @@
 
 Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, reports the reverse blast radius of changing a header, diffs a tree against a recorded baseline to catch coupling regressions, exports the graph to DOT/Mermaid, honours `.knotignore` rules for generated or vendor code, enforces a repository-owned policy with `knot check`, flags used types whose header is not included, and recommends forward declarations as deterministic, actionable reports.
 
+> **Archived**: Testbed for AIKit itself: used to validate the full-history Reforge host-review, repair and delivery workflow end to end (32 commits, 264 hunks attested, 17 fixes, 710 checks). No further development planned. (archived 2026-11-22). This project is read-only; its GitHub repository is archived.
+
 ## ⚡ 30-Second Cold-Start Quick Reference
 
 - **Runtime Prerequisites**: C++17 toolchain — GNU g++ 12 or newer, MSVC 19.30 or newer, or Clang 14 or newer. Verified on MinGW g++ 16.2. No third-party libraries.
