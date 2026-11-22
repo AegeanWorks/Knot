@@ -1,13 +1,13 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "knot-policy-check",
+    "task_id": "knot-missing-includes",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1795314339.4047308,
+    "updated_at": 1795314740.4332929,
     "owner": "opencode:ses_dff2f155",
-    "lease_until": 1795321539.4047308,
+    "lease_until": 1795321940.4332929,
     "started_by": "opencode:ses_dff2f155",
     "continuations": [],
     "workspaces": [
@@ -16,104 +16,11 @@
         "path": "projects/knot"
       }
     ],
-    "completed_at": 1795314348.4922478,
-    "completed_head": "e72123394ae138d518915822ea6a576658985118",
-    "completed_tree": "c13d73c9b1f614de6bf3e64535a26826aff541b4"
+    "completed_at": 1795314748.339101,
+    "completed_head": "853d2d63d9dbf0527b48e90d9f965d76245089e8",
+    "completed_tree": "443507a2fdfaffbfa5573f7a07da9d85555a489a"
   },
   "checkpoints": [
-    {
-      "task_id": "knot-path-and-diff",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/5] Plan: add shortest include-path queries (knot why), a pure JSON snapshot reader and deterministic baseline diff (knot diff), plus CI thresholds; keep core pure and all stateful traversals as explicit state machines.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795311932.3668382,
-      "timestamp_str": "2026-11-22 04:45:32",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "Finding a cycle is only half the job: programmers need to know the exact chain that pulls a header in, and CI needs to detect that header coupling grew since a recorded baseline.",
-        "benefits": "Actionable 'why is this header here' answers and a golden-baseline regression gate that makes include-graph growth visible before it lands.",
-        "risks": "contract: new CLI flags and a versioned snapshot schema; dependency: none (C++17 stdlib only); concurrency: none; state: BFS and JSON lexing must be explicit state machines, not hidden mutable state.",
-        "mitigation": "Pure BFS/json_step/transition functions with deterministic tie-breaking; property test that render_json output parses back to the same snapshot; fail-first tests for diff verdicts; full AIKit gate run before commit."
-      },
-      "plan_digest": "db3c4485c7c28849bf8f190603296cfe9526d01750c4c9af896a6e2065e0f7a4",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-path-and-diff",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/5] Pure core additions: BFS path state machine, JSON lexer + parser, snapshot/diff model, include resolution for absolute roots; 115 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795312895.129538,
-      "timestamp_str": "2026-11-22 05:01:35",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-path-and-diff",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/5] Shell additions: why/diff subcommands, CI threshold flags, baseline file read at the edge; end-to-end smoke proves path output and regression exit 1.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795312928.8969488,
-      "timestamp_str": "2026-11-22 05:02:08",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-path-and-diff",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/5] README/ADR-002/codebase map updated, AIKit audit report extended; 5/5 gates pass and 115 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795312987.405821,
-      "timestamp_str": "2026-11-22 05:03:07",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-path-and-diff",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-path-and-diff' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795313014.6571183,
-      "timestamp_str": "2026-11-22 05:03:34",
-      "agent": "opencode:ses_dff2f155",
-      "head": "047939316faae966a9a3c07a925e218b9ea03e4c",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
     {
       "task_id": "knot-impact-and-export",
       "phase": "phase 2",
@@ -386,6 +293,99 @@
       "timestamp_str": "2026-11-22 05:25:48",
       "agent": "opencode:ses_dff2f155",
       "head": "e72123394ae138d518915822ea6a576658985118",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "knot-missing-includes",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/5] Plan: add advisory detection of used types whose defining internal header is not reachable from the translation unit, reusing the pure identifier scanner and path query.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795314429.5650895,
+      "timestamp_str": "2026-11-22 05:27:09",
+      "agent": "opencode:ses_dff2f155",
+      "impact_assessment": {
+        "why": "A very common C++ error is using a type whose header was never included (or was only included transitively elsewhere); compilers report it far from the cause.",
+        "benefits": "Actionable 'consider including X.hpp' advice derived from the same inspectable graph, with no compiler or third-party tooling.",
+        "risks": "contract: a new recommendation kind and render label; dependency: none; concurrency: none; state: the analysis stays pure and uses the existing path query.",
+        "mitigation": "Advisory-only wording, restrict candidates to scanned headers and exact type identifiers, golden tests for included vs missing cases, full gates before commit."
+      },
+      "plan_digest": "223939aef521c5a1c295ed7bdc178b3b40dbb59eb3cb64bfa4c7bc69e7f2a19c",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-missing-includes",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/5] Pure core: missing_includes reuses identifier scanner and path query; add-include kind in renderers and snapshots; 164 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795314669.0214756,
+      "timestamp_str": "2026-11-22 05:31:09",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-missing-includes",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/5] Shell: no new I/O path; advisory surfaced through the existing scan renderer; fixture smoke confirms add-include appears only when the header is unreachable.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795314676.44735,
+      "timestamp_str": "2026-11-22 05:31:16",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-missing-includes",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/5] README, ADR-006, map and consolidated audit updated; 5/5 gates pass and 164 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795314740.4332929,
+      "timestamp_str": "2026-11-22 05:32:20",
+      "agent": "opencode:ses_dff2f155",
+      "checklists": "passed",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-missing-includes",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'knot-missing-includes' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795314748.4005082,
+      "timestamp_str": "2026-11-22 05:32:28",
+      "agent": "opencode:ses_dff2f155",
+      "head": "853d2d63d9dbf0527b48e90d9f965d76245089e8",
       "delivery": {
         "roots": [
           "."
