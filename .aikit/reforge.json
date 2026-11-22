@@ -47,7 +47,7 @@
       ],
       "status": "completed",
       "created": "2026-11-22T14:40:13",
-      "updated": "2026-11-22T15:35:59",
+      "updated": "2026-11-22T15:40:21",
       "last_audit": {
         "run": "run-1",
         "stage": 6,
@@ -634,9 +634,10 @@
           "delivery": {
             "commit": "85c46ef6dab0df4d0c77f9bdae22b24f7add98be",
             "short": "85c46ef",
-            "pushed": false,
+            "pushed": true,
             "empty": false,
-            "timestamp": "2026-11-22T15:35:59"
+            "timestamp": "2026-11-22T15:35:59",
+            "push_error": null
           },
           "timestamp": "2026-11-22T14:43:43",
           "dirty_targets": []
@@ -889,9 +890,10 @@
           "delivery": {
             "commit": "48eed4a4e2b4d971868fce7f897184bc80232c7f",
             "short": "48eed4a",
-            "pushed": false,
+            "pushed": true,
             "empty": false,
-            "timestamp": "2026-11-22T15:35:59"
+            "timestamp": "2026-11-22T15:35:59",
+            "push_error": null
           },
           "timestamp": "2026-11-22T14:51:15",
           "dirty_targets": [
@@ -1108,9 +1110,10 @@
           "delivery": {
             "commit": "8186f858f21941688c40f72719824242e9c97e34",
             "short": "8186f85",
-            "pushed": false,
+            "pushed": true,
             "empty": false,
-            "timestamp": "2026-11-22T15:35:59"
+            "timestamp": "2026-11-22T15:35:59",
+            "push_error": null
           },
           "timestamp": "2026-11-22T14:55:33",
           "dirty_targets": [
@@ -1539,9 +1542,10 @@
           "delivery": {
             "commit": "34d1968e6ce6d529080d6ddf3a4cea93d23f636d",
             "short": "34d1968",
-            "pushed": false,
+            "pushed": true,
             "empty": false,
-            "timestamp": "2026-11-22T15:35:59"
+            "timestamp": "2026-11-22T15:35:59",
+            "push_error": null
           },
           "timestamp": "2026-11-22T14:58:03",
           "dirty_targets": [

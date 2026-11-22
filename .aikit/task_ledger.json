@@ -82,30 +82,6 @@
     },
     {
       "task_id": "reforge:run-1",
-      "phase": "reforge run",
-      "phase_num": 3,
-      "description": "run started (start=6, step=6, stop=None)",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795347613.0450745,
-      "timestamp_str": "2026-11-22 14:40:13",
-      "agent": "opencode",
-      "operator_task": "knot-brand-and-publish"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 1",
-      "phase_num": 3,
-      "description": "Reforge stage 1: window 6, 6 commit(s), 12 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795347619.7791135,
-      "timestamp_str": "2026-11-22 14:40:19",
-      "agent": "opencode",
-      "operator_task": "knot-brand-and-publish"
-    },
-    {
-      "task_id": "reforge:run-1",
       "phase": "reforge stage 1",
       "phase_num": 3,
       "description": "Reforge stage 1: stage 1 host review reviewed; run active; coverage 23/23",
@@ -281,6 +257,30 @@
       "status": "completed",
       "timestamp": 1795349104.3455458,
       "timestamp_str": "2026-11-22 15:05:04",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 5",
+      "phase_num": 3,
+      "description": "Reforge stage 5: backlog push of stage(s) 2,3,4,5; HEAD 06d1cccb4380",
+      "files_affected": [],
+      "status": "completed",
+      "timestamp": 1795351221.690832,
+      "timestamp_str": "2026-11-22 15:40:21",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 6",
+      "phase_num": 3,
+      "description": "Reforge stage 6: stage 6 host review reviewed; run completed; coverage 26/26",
+      "files_affected": [],
+      "status": "completed",
+      "timestamp": 1795351235.6036556,
+      "timestamp_str": "2026-11-22 15:40:35",
       "agent": "opencode",
       "operator_task": "knot-brand-and-publish"
     }
