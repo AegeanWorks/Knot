@@ -25,3 +25,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: Cycles and cost reports identify a problem but not the exact include chain, and nothing detects that coupling grew between revisions; the user asked for continued autonomous implementation of programmer-facing features under the same architectural constraints.
 - **Decision**: Added a pure BFS state machine for shortest include paths (knot why), a pure JSON lexer/parser for Knot's own versioned report schema, and a pure snapshot/diff model (knot diff) with CI regression flags. Relative includes are resolved to scanned documents by path suffix inside analyze(), so absolute roots do not duplicate nodes. All new I/O stays in files.cpp.
 - **Consequences**: Coupling regressions can be blocked in CI with --fail-on-regression, and 'why is this header here' is answerable without a compiler; a snapshot round-trip property test and 41 new checks protect the new code; the version string moved to 0.2.0. A baseline produced by Knot 0.1.x contains duplicate nodes and must be regenerated.
+
+### ADR-003: Add reverse impact analysis and DOT/Mermaid graph export
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: Maintainers need the blast radius of a header change and a reviewable picture of coupling; the user asked for continued autonomous features under the same architectural constraints.
+- **Decision**: reverse_graph plus an explicit impact_step BFS compute the sorted set of nodes that transitively include a target; render_dot and render_mermaid emit deterministic, escaped graph documents. Both live in the pure core; the shell only loads sources, resolves the user's node name and writes the result.
+- **Consequences**: Impact sets and exports are reproducible enough to attach to CI artifacts and documentation; 18 new checks cover reverse BFS, escaping and format validation; no new dependency or I/O path was introduced.

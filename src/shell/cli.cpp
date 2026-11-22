@@ -27,6 +27,8 @@ std::string usage_text() {
            "  knot cycles <dir> [--format text|json]\n"
            "  knot hotspots <dir> [--format text|json] [--top N]\n"
            "  knot why <dir> <header> [--from <file>] [--format text|json]\n"
+           "  knot impact <dir> <header> [--format text|json]\n"
+           "  knot graph <dir> [--format dot|mermaid]\n"
            "  knot diff --baseline <file> --current <dir> [--format text|json]\n"
            "                  [--fail-on-regression]\n"
            "  knot demo\n"
@@ -59,6 +61,8 @@ Command parse_args(int argc, char** argv) {
     else if (sub == "hotspots") cmd.kind = CommandKind::Hotspots;
     else if (sub == "why") cmd.kind = CommandKind::Why;
     else if (sub == "diff") cmd.kind = CommandKind::Diff;
+    else if (sub == "impact") cmd.kind = CommandKind::Impact;
+    else if (sub == "graph") cmd.kind = CommandKind::Graph;
     else {
         cmd.error = "unknown subcommand: " + sub;
         return cmd;
@@ -69,13 +73,14 @@ Command parse_args(int argc, char** argv) {
     if (cmd.kind != CommandKind::Diff && index < argc && argv[index][0] != '-') {
         cmd.root = argv[index++];
     }
-    if (cmd.kind == CommandKind::Why) {
+    if (cmd.kind == CommandKind::Why || cmd.kind == CommandKind::Impact) {
         if (index >= argc) {
-            cmd.error = "why needs a target header";
+            cmd.error = sub + " needs a target header";
             return cmd;
         }
         cmd.target = argv[index++];
     }
+    if (cmd.kind == CommandKind::Graph) cmd.format = "dot";
 
     for (; index < argc; ++index) {
         std::string flag = argv[index];
@@ -93,8 +98,20 @@ Command parse_args(int argc, char** argv) {
             std::string value = argv[index];
             if (flag == "--format") {
                 cmd.format = value;
-                if (cmd.format != "text" && cmd.format != "json") {
+                bool allowed = cmd.format == "text" || cmd.format == "json" ||
+                               cmd.format == "dot" || cmd.format == "mermaid";
+                if (!allowed) {
                     cmd.error = "unknown format: " + cmd.format;
+                    return cmd;
+                }
+                if (cmd.kind == CommandKind::Graph && cmd.format != "dot" &&
+                    cmd.format != "mermaid") {
+                    cmd.error = "graph needs --format dot or mermaid";
+                    return cmd;
+                }
+                if (cmd.kind == CommandKind::Impact && cmd.format != "text" &&
+                    cmd.format != "json") {
+                    cmd.error = "impact needs --format text or json";
                     return cmd;
                 }
             } else if (flag == "--top") {

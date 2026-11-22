@@ -4,7 +4,9 @@
 #include <vector>
 
 #include "core/diff.hpp"
+#include "core/export.hpp"
 #include "core/graph.hpp"
+#include "core/impact.hpp"
 #include "core/json.hpp"
 #include "core/lexer.hpp"
 #include "core/path.hpp"
@@ -346,6 +348,63 @@ void test_absolute_root_resolution() {
     CHECK(analyze(cyclic).cycles.size() == 1);
 }
 
+void test_impact() {
+    IncludeGraph g = build_graph({
+        {"app.cpp", "a.hpp", 1}, {"app.cpp", "direct.hpp", 2},
+        {"a.hpp", "b.hpp", 1}, {"direct.hpp", "b.hpp", 1},
+        {"b.hpp", "core.hpp", 1}});
+    std::vector<std::string> affected = impact_set(g, "core.hpp");
+    CHECK(affected.size() == 4);
+    CHECK(affected[0] == "a.hpp" && affected[3] == "direct.hpp");
+    CHECK(impact_set(g, "missing.hpp").empty());
+    ImpactState s = impact_init(g, "core.hpp");
+    CHECK(s.marks[g.index.at("core.hpp")] == ImpactMark::Seen);
+    int steps = 0;
+    while (!s.done && steps++ < 100) s = impact_step(s, g, reverse_graph(g));
+    CHECK(s.done && steps < 100);
+    CHECK(render_impact_text("core.hpp", affected).find("4 affected node(s)") != std::string::npos);
+    CHECK(render_impact_json("core.hpp", affected).find("\"impact\": [") != std::string::npos);
+}
+
+void test_export() {
+    std::vector<SourceDoc> docs{
+        {"app.cpp", "#include \"a.hpp\"\n#include <vector>\n"},
+        {"a.hpp", "struct A {};\n"}};
+    Analysis a = analyze(docs);
+    std::string dot = render_dot(a);
+    std::string mermaid = render_mermaid(a);
+    CHECK(dot.find("digraph knot {") == 0);
+    CHECK(dot.find("\"app.cpp\" -> \"a.hpp\";") != std::string::npos);
+    CHECK(mermaid.find("graph TD") == 0);
+    CHECK(mermaid.find(" --> n") != std::string::npos);
+    CHECK(render_dot(analyze(docs)) == dot);
+    CHECK(render_mermaid(analyze(docs)) == mermaid);
+    std::vector<SourceDoc> quoted{{"a.cpp", "#include \"weird\\name.hpp\"\n"}};
+    CHECK(render_dot(analyze(quoted)).find("weird\\\\name.hpp") != std::string::npos);
+}
+
+void test_cli_wave3() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* graph = const_cast<char*>("graph");
+    char* dir = const_cast<char*>("src");
+    char* fmt = const_cast<char*>("--format");
+    char* mermaid = const_cast<char*>("mermaid");
+    char* gargv[] = {argv0, graph, dir, fmt, mermaid};
+    Command g = parse_args(5, gargv);
+    CHECK(g.kind == CommandKind::Graph && g.format == "mermaid" && g.error.empty());
+    char* default_graph[] = {argv0, graph, dir};
+    CHECK(parse_args(3, default_graph).format == "dot");
+    char* bad_graph[] = {argv0, graph, dir, fmt, const_cast<char*>("json")};
+    CHECK(!parse_args(5, bad_graph).error.empty());
+
+    char* impact = const_cast<char*>("impact");
+    char* target = const_cast<char*>("core.hpp");
+    char* iargv[] = {argv0, impact, dir, target};
+    Command i = parse_args(4, iargv);
+    CHECK(i.kind == CommandKind::Impact && i.target == "core.hpp" && i.error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -367,6 +426,9 @@ int main() {
     test_paths();
     test_cli_extensions();
     test_absolute_root_resolution();
+    test_impact();
+    test_export();
+    test_cli_wave3();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

@@ -2,7 +2,7 @@
 
 [![Built with AIKit](https://img.shields.io/badge/built%20with-AIKit-6f42c1)](https://github.com/AegeanWorks/AIKit)
 
-Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, diffs a tree against a recorded baseline to catch coupling regressions, and recommends forward declarations as deterministic, actionable reports.
+Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, reports the reverse blast radius of changing a header, diffs a tree against a recorded baseline to catch coupling regressions, exports the graph to DOT/Mermaid, and recommends forward declarations as deterministic, actionable reports.
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
@@ -14,7 +14,7 @@ Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parse
 
 ### What it does
 
-Point Knot at a C/C++ tree and it answers five questions a compiler will not
+Point Knot at a C/C++ tree and it answers seven questions a compiler will not
 tell you directly:
 
 1. Which headers form an include cycle? (`cycles`)
@@ -24,6 +24,8 @@ tell you directly:
 4. *Why* is a header here — what is the shortest include chain from a translation
    unit to it? (`why`)
 5. Did coupling grow since a recorded baseline? (`diff --baseline ... --current ...`)
+6. What breaks if I change this header — the reverse transitive closure? (`impact`)
+7. Can I review the whole graph as a picture? (`graph --format dot|mermaid`)
 
 Output is deterministic: input documents are sorted by path, graph nodes and
 recommendations are sorted by stable keys, and the JSON schema is versioned.
@@ -37,6 +39,8 @@ knot scan <dir> [--format text|json] [--top N] [--fail-on-cycle]
 knot cycles <dir> [--format text|json]
 knot hotspots <dir> [--format text|json] [--top N]
 knot why <dir> <header> [--from <file>] [--format text|json]
+knot impact <dir> <header> [--format text|json]
+knot graph <dir> [--format dot|mermaid]
 knot diff --baseline <file> --current <dir> [--format text|json]
                   [--fail-on-regression]
 knot demo
@@ -71,16 +75,20 @@ Recommendations (3):
   edge, calls the pure core, and writes at the edge.
 - **Explicit state machines**: the include lexer (15 states), the iterative DFS
   cycle detector (white/gray/black marks + frame stack), the identifier scanner,
-  the transitive-cost worklist, the BFS path search (`path_step`), and the JSON
-  lexer (`json_lex_step`). No hidden recursion drives analysis state.
+  the transitive-cost worklist, the BFS path search (`path_step`), the reverse
+  impact BFS (`impact_step`) and the JSON lexer (`json_lex_step`). No hidden
+  recursion drives analysis state.
 - **Pure snapshot diff**: `render_json` output parses back through `parse_json`
   into the same `Snapshot` (property test), and `diff_snapshots` reports added
   cycles, cost/hotspot changes and recommendation changes deterministically.
 - **Include resolution**: relative quoted includes are matched to scanned
   documents by path suffix before graph construction, so an absolute scan root
   never creates two nodes for one file.
+- **Reverse impact and export**: `reverse_graph` + `impact_step` compute the
+  sorted set of nodes that transitively include a header; `render_dot` and
+  `render_mermaid` emit stable, escaped graph documents.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 115 checks cover comments, strings, malformed directives,
+  their outputs; 133 checks cover comments, strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 
@@ -120,6 +128,10 @@ knot/
 ├── src/core/json.cpp         <- JSON lexer state machine + parser
 ├── src/core/diff.hpp         <- snapshot and diff declarations
 ├── src/core/diff.cpp         <- snapshot reader, diff verdict, renderers
+├── src/core/impact.hpp       <- reverse impact declarations
+├── src/core/impact.cpp       <- reverse_graph, impact_step, renderers
+├── src/core/export.hpp       <- DOT/Mermaid export declarations
+├── src/core/export.cpp       <- pure, escaped graph renderers
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration

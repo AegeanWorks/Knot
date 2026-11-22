@@ -4,6 +4,8 @@
 
 #include "cli.hpp"
 #include "core/diff.hpp"
+#include "core/export.hpp"
+#include "core/impact.hpp"
 #include "core/path.hpp"
 #include "core/report.hpp"
 #include "files.hpp"
@@ -83,6 +85,24 @@ int main(int argc, char** argv) {
 
     // I/O stops here. Everything below is pure computation.
     const knot::core::Analysis analysis = knot::core::analyze(std::move(docs));
+
+    if (cmd.kind == knot::shell::CommandKind::Graph) {
+        const std::string rendered = cmd.format == "mermaid"
+                                         ? knot::core::render_mermaid(analysis)
+                                         : knot::core::render_dot(analysis);
+        if (!knot::shell::write_stdout(rendered)) return 3;
+        return 0;
+    }
+
+    if (cmd.kind == knot::shell::CommandKind::Impact) {
+        const std::string target = knot::core::resolve_node(analysis.graph, cmd.target);
+        const std::vector<std::string> impacted = knot::core::impact_set(analysis.graph, target);
+        const std::string rendered = cmd.format == "json"
+                                         ? knot::core::render_impact_json(target, impacted)
+                                         : knot::core::render_impact_text(target, impacted);
+        if (!knot::shell::write_stdout(rendered)) return 3;
+        return 0;
+    }
 
     if (cmd.kind == knot::shell::CommandKind::Why) {
         const std::string target = knot::core::resolve_node(analysis.graph, cmd.target);
