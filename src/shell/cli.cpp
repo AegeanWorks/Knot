@@ -28,6 +28,7 @@ std::string usage_text() {
            "  knot cycles <dir> [--format text|json]\n"
            "  knot hotspots <dir> [--format text|json] [--top N]\n"
            "  knot stats <dir> [--format text|json]\n"
+           "  knot csv <dir> [--kind costs|hotspots|recommendations]\n"
            "  knot why <dir> <header> [--from <file>] [--format text|json]\n"
            "  knot impact <dir> <header> [--format text|json]\n"
            "  knot graph <dir> [--format dot|mermaid]\n"
@@ -67,6 +68,7 @@ Command parse_args(int argc, char** argv) {
     else if (sub == "cycles") cmd.kind = CommandKind::Cycles;
     else if (sub == "hotspots") cmd.kind = CommandKind::Hotspots;
     else if (sub == "stats") cmd.kind = CommandKind::Stats;
+    else if (sub == "csv") cmd.kind = CommandKind::Csv;
     else if (sub == "why") cmd.kind = CommandKind::Why;
     else if (sub == "diff") cmd.kind = CommandKind::Diff;
     else if (sub == "impact") cmd.kind = CommandKind::Impact;
@@ -110,7 +112,7 @@ Command parse_args(int argc, char** argv) {
             cmd.force = true;
         } else if (flag == "--format" || flag == "--top" || flag == "--from" ||
                    flag == "--baseline" || flag == "--current" || flag == "--ignore" ||
-                   flag == "--policy" || flag == "--root" ||
+                   flag == "--policy" || flag == "--root" || flag == "--kind" ||
                    flag == "--fail-on-cost" || flag == "--fail-on-hotspot") {
             if (++index >= argc) {
                 cmd.error = flag + " needs a value";
@@ -148,6 +150,13 @@ Command parse_args(int argc, char** argv) {
                 cmd.ignore_file = value;
             } else if (flag == "--policy") {
                 cmd.policy_file = value;
+            } else if (flag == "--kind") {
+                cmd.csv_kind = value;
+                if (cmd.csv_kind != "costs" && cmd.csv_kind != "hotspots" &&
+                    cmd.csv_kind != "recommendations") {
+                    cmd.error = "unknown csv kind: " + cmd.csv_kind;
+                    return cmd;
+                }
             } else if (flag == "--root") {
                 cmd.roots.push_back(value);
             } else if (flag == "--current") {

@@ -88,3 +88,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: Explicit state machines must be total over arbitrary bytes; hand-written examples cannot cover the cross-product of lexer, JSON, glob and policy inputs.
 - **Decision**: A fixed-seed LCG drives 500 generated strings through every transition function and the whole analyze/render pipeline in the test binary, asserting termination and that a snapshot diff against itself is empty.
 - **Consequences**: No defect was found; the suite grew from 190 to 690 checks with no production change, giving a reproducible robustness signal on every gate run.
+
+### ADR-012: Add CSV export for analysis tables
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: JSON suits tools but not spreadsheets or issue attachments; the same deterministic tables needed a human-friendly machine format.
+- **Decision**: Pure renderers emit costs, hotspots and recommendations as CSV with RFC-style quoting; 'knot csv <dir> --kind ...' writes them at the existing stdout edge.
+- **Consequences**: A self-scan produced a sorted costs table immediately; seven new checks cover quoting of commas, quotes and reason text; 697 checks pass with no new dependency.

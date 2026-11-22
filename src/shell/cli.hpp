@@ -7,7 +7,7 @@
 
 namespace knot::shell {
 
-enum class CommandKind { Scan, Cycles, Hotspots, Stats, Why, Diff, Impact, Graph, Check, Init, Baseline, Demo, Help, Version };
+enum class CommandKind { Scan, Cycles, Hotspots, Stats, Csv, Why, Diff, Impact, Graph, Check, Init, Baseline, Demo, Help, Version };
 
 struct Command {
     CommandKind kind = CommandKind::Help;
@@ -18,6 +18,7 @@ struct Command {
     std::string baseline;
     std::string ignore_file;
     std::string policy_file;
+    std::string csv_kind = "costs";
     std::string format = "text";
     std::size_t top = 10;
     std::size_t fail_cost = 0;

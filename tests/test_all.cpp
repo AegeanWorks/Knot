@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "core/csv.hpp"
 #include "core/diff.hpp"
 #include "core/export.hpp"
 #include "core/graph.hpp"
@@ -680,6 +681,39 @@ void test_generated_inputs() {
     }
 }
 
+void test_csv() {
+    Analysis a;
+    a.costs.push_back(Cost{"a,b\"c", 2, 3});
+    a.hotspots.push_back(Hotspot{"common.hpp", 7});
+    Recommendation rec;
+    rec.kind = Recommendation::Kind::AddInclude;
+    rec.file = "app.cpp";
+    rec.header = "x.hpp";
+    rec.reason = "uses X, but not included";
+    a.recommendations.push_back(rec);
+
+    std::string costs = render_costs_csv(a);
+    CHECK(costs.find("node,direct,transitive") == 0);
+    CHECK(costs.find("\"a,b\"\"c\",2,3") != std::string::npos);
+    CHECK(render_costs_csv(a) == costs);
+    CHECK(render_hotspots_csv(a).find("common.hpp,7") != std::string::npos);
+    CHECK(render_recommendations_csv(a).find("\"uses X, but not included\"") != std::string::npos);
+}
+
+void test_cli_csv() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* csv = const_cast<char*>("csv");
+    char* dir = const_cast<char*>("src");
+    char* kind_flag = const_cast<char*>("--kind");
+    char* kind = const_cast<char*>("hotspots");
+    char* argv[] = {argv0, csv, dir, kind_flag, kind};
+    Command c = parse_args(5, argv);
+    CHECK(c.kind == CommandKind::Csv && c.csv_kind == "hotspots" && c.error.empty());
+    char* bad[] = {argv0, csv, dir, kind_flag, const_cast<char*>("yaml")};
+    CHECK(!parse_args(5, bad).error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -719,6 +753,8 @@ int main() {
     test_path_qualification();
     test_cli_multi_root();
     test_generated_inputs();
+    test_csv();
+    test_cli_csv();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

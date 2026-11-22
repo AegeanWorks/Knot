@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "cli.hpp"
+#include "core/csv.hpp"
 #include "core/diff.hpp"
 #include "core/export.hpp"
 #include "core/impact.hpp"
@@ -161,6 +162,16 @@ int main(int argc, char** argv) {
                                          : knot::core::render_violations_text(violations);
         if (!knot::shell::write_stdout(rendered)) return 3;
         return violations.empty() ? 0 : 1;
+    }
+
+    if (cmd.kind == knot::shell::CommandKind::Csv) {
+        const std::string rendered = cmd.csv_kind == "hotspots"
+                                         ? knot::core::render_hotspots_csv(analysis)
+                                     : cmd.csv_kind == "recommendations"
+                                         ? knot::core::render_recommendations_csv(analysis)
+                                         : knot::core::render_costs_csv(analysis);
+        if (!knot::shell::write_stdout(rendered)) return 3;
+        return 0;
     }
 
     if (cmd.kind == knot::shell::CommandKind::Stats) {

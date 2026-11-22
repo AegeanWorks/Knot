@@ -45,6 +45,7 @@ knot scan <dir> [--format text|json] [--top N] [--fail-on-cycle]
 knot cycles <dir> [--format text|json]
 knot hotspots <dir> [--format text|json] [--top N]
 knot stats <dir> [--format text|json]
+knot csv <dir> [--kind costs|hotspots|recommendations]
 knot why <dir> <header> [--from <file>] [--format text|json]
 knot impact <dir> <header> [--format text|json]
 knot graph <dir> [--format dot|mermaid]
@@ -125,7 +126,7 @@ Recommendations (3):
   walker applies them to paths relative to the scan root, so one rule set is
   shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 690 checks include a seeded 500-case generated-input harness
+  their outputs; 697 checks include a seeded 500-case generated-input harness
   that drives every state machine and the whole pipeline, plus comments,
   strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
@@ -183,6 +184,8 @@ knot/
 ├── src/core/stats.cpp        <- pure counts + deepest chain via BFS
 ├── src/core/paths.hpp        <- multi-root path qualification
 ├── src/core/paths.cpp        <- pure qualified-path rule
+├── src/core/csv.hpp          <- CSV renderer declarations
+├── src/core/csv.cpp          <- pure, correctly escaped CSV tables
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration
