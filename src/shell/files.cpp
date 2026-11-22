@@ -64,9 +64,26 @@ bool load_sources(const std::vector<std::string>& roots,
                   std::vector<knot::core::SourceDoc>& out) {
     if (roots.empty()) return false;
     const bool multiple = roots.size() > 1;
+    std::vector<std::string> overrides(roots.size());
+    if (multiple) {
+        for (std::size_t i = 0; i < roots.size(); ++i) {
+            for (std::size_t j = i + 1; j < roots.size(); ++j) {
+                if (knot::core::qualify_path(roots[i], "", true) ==
+                    knot::core::qualify_path(roots[j], "", true)) {
+                    overrides[i] = roots[i];
+                    overrides[j] = roots[j];
+                }
+            }
+        }
+        for (std::string& override : overrides) {
+            for (char& c : override) if (c == '\\') c = '/';
+            while (override.size() > 1 && override.back() == '/') override.pop_back();
+        }
+    }
     std::vector<std::pair<fs::path, std::string>> entries;
 
-    for (const auto& root : roots) {
+    for (std::size_t root_index = 0; root_index < roots.size(); ++root_index) {
+        const std::string& root = roots[root_index];
         std::error_code ec;
         if (!fs::is_directory(root, ec)) return false;
         for (fs::recursive_directory_iterator it(root, fs::directory_options::skip_permission_denied, ec),
@@ -78,7 +95,8 @@ bool load_sources(const std::vector<std::string>& roots,
             if (ec) return false;
             if (knot::core::is_ignored(rules, relative)) continue;
             entries.push_back({it->path(),
-                               knot::core::qualify_path(root, relative, multiple)});
+                               knot::core::qualify_path(root, relative, multiple,
+                                                        overrides[root_index])});
         }
         if (ec) return false;
     }
