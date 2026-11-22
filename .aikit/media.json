@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "knot",
+  "repo": "Knot",
+  "has_ui": false,
+  "ui_kind": "library",
+  "palette": [
+    "#07120d",
+    "#123030",
+    "#66f5bc",
+    "#8eaaf5"
+  ],
+  "motif": "cube",
+  "layout": "wave",
+  "assets": {
+    "logo": {
+      "path": "assets/logo.svg",
+      "status": "approved",
+      "commit": "",
+      "generated_at": "2026-11-22T12:14:39",
+      "review": {
+        "status": "approved",
+        "reviewer": "agent:opencode",
+        "method": "structural",
+        "notes": "Valid 512x512 SVG with title/desc, AegeanWorks palette and KN monogram; no external resources.",
+        "score": null,
+        "reviewed_at": "2026-11-22T12:15:32"
+      }
+    },
+    "social_preview": {
+      "path": "assets/social-preview.svg",
+      "status": "approved",
+      "commit": "",
+      "generated_at": "2026-11-22T12:14:39",
+      "review": {
+        "status": "approved",
+        "reviewer": "agent:opencode",
+        "method": "structural",
+        "notes": "Valid 1280x640 SVG with title/desc matching the project description and consistent brand styling; no external resources.",
+        "score": null,
+        "reviewed_at": "2026-11-22T12:15:33"
+      }
+    }
+  },
+  "screenshots": []
+}
