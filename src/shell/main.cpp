@@ -6,6 +6,7 @@
 #include "core/csv.hpp"
 #include "core/diff.hpp"
 #include "core/export.hpp"
+#include "core/html.hpp"
 #include "core/impact.hpp"
 #include "core/ignore.hpp"
 #include "core/path.hpp"
@@ -201,6 +202,26 @@ int main(int argc, char** argv) {
             return 3;
         }
         knot::shell::write_stdout("knot: wrote baseline " + cmd.baseline + "\n");
+        return 0;
+    }
+
+    if (cmd.kind == knot::shell::CommandKind::Report) {
+        if (!cmd.force && knot::shell::file_exists(cmd.output)) {
+            knot::shell::write_stderr(
+                "knot: report already exists; pass --force to overwrite\n");
+            return 2;
+        }
+        std::vector<knot::core::SourceDoc> docs;
+        if (!knot::shell::load_sources(cmd.roots, load_rules(cmd), docs)) {
+            knot::shell::write_stderr("knot: cannot read directory: " + cmd.root + "\n");
+            return 3;
+        }
+        const knot::core::Analysis analysis = knot::core::analyze(std::move(docs));
+        if (!knot::shell::write_text_file(cmd.output, knot::core::render_html(analysis))) {
+            knot::shell::write_stderr("knot: cannot write report: " + cmd.output + "\n");
+            return 3;
+        }
+        knot::shell::write_stdout("knot: wrote report " + cmd.output + "\n");
         return 0;
     }
 

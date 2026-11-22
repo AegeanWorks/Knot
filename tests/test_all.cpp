@@ -8,6 +8,7 @@
 #include "core/export.hpp"
 #include "core/graph.hpp"
 #include "core/impact.hpp"
+#include "core/html.hpp"
 #include "core/ignore.hpp"
 #include "core/missing.hpp"
 #include "core/json.hpp"
@@ -714,6 +715,35 @@ void test_cli_csv() {
     CHECK(!parse_args(5, bad).error.empty());
 }
 
+void test_html_report() {
+    Analysis a;
+    a.costs.push_back(Cost{"a<b>&\"'", 2, 3});
+    Recommendation rec;
+    rec.kind = Recommendation::Kind::AddInclude;
+    rec.file = "app.cpp";
+    rec.header = "x.hpp";
+    rec.reason = "uses <X> & Y";
+    a.recommendations.push_back(rec);
+    std::string html = render_html(a);
+    CHECK(html.find("<!doctype html>") == 0);
+    CHECK(html.find("a&lt;b&gt;&amp;&quot;&#39;") != std::string::npos);
+    CHECK(html.find("uses &lt;X&gt; &amp; Y") != std::string::npos);
+    CHECK(html.find("digraph knot") != std::string::npos);
+    CHECK(render_html(a) == html);
+}
+
+void test_cli_report() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* report = const_cast<char*>("report");
+    char* dir = const_cast<char*>("src");
+    char* file = const_cast<char*>("r.html");
+    char* force = const_cast<char*>("--force");
+    char* argv[] = {argv0, report, dir, file, force};
+    Command c = parse_args(5, argv);
+    CHECK(c.kind == CommandKind::Report && c.output == "r.html" && c.force && c.error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -755,6 +785,8 @@ int main() {
     test_generated_inputs();
     test_csv();
     test_cli_csv();
+    test_html_report();
+    test_cli_report();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

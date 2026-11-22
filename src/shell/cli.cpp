@@ -35,6 +35,7 @@ std::string usage_text() {
            "  knot check <dir> [--policy <file>] [--format text|json]\n"
            "  knot init <dir> [--force]\n"
            "  knot baseline <dir> <file> [--force]\n"
+           "  knot report <dir> <file> [--force]\n"
            "  knot diff --baseline <file> --current <dir> [--format text|json]\n"
            "                  [--fail-on-regression]\n"
            "  knot demo\n"
@@ -76,6 +77,7 @@ Command parse_args(int argc, char** argv) {
     else if (sub == "check") cmd.kind = CommandKind::Check;
     else if (sub == "init") cmd.kind = CommandKind::Init;
     else if (sub == "baseline") cmd.kind = CommandKind::Baseline;
+    else if (sub == "report") cmd.kind = CommandKind::Report;
     else {
         cmd.error = "unknown subcommand: " + sub;
         return cmd;
@@ -86,12 +88,13 @@ Command parse_args(int argc, char** argv) {
     if (cmd.kind != CommandKind::Diff && index < argc && argv[index][0] != '-') {
         cmd.root = argv[index++];
     }
-    if (cmd.kind == CommandKind::Baseline) {
+    if (cmd.kind == CommandKind::Baseline || cmd.kind == CommandKind::Report) {
         if (index >= argc) {
-            cmd.error = "baseline needs an output file";
+            cmd.error = sub + " needs an output file";
             return cmd;
         }
-        cmd.baseline = argv[index++];
+        if (cmd.kind == CommandKind::Baseline) cmd.baseline = argv[index++];
+        else cmd.output = argv[index++];
     }
     if (cmd.kind == CommandKind::Why || cmd.kind == CommandKind::Impact) {
         if (index >= argc) {
