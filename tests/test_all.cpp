@@ -3,8 +3,11 @@
 #include <string>
 #include <vector>
 
+#include "core/diff.hpp"
 #include "core/graph.hpp"
+#include "core/json.hpp"
 #include "core/lexer.hpp"
+#include "core/path.hpp"
 #include "core/report.hpp"
 #include "shell/cli.hpp"
 
@@ -220,6 +223,129 @@ void test_cli() {
     CHECK(!parse_args(2, unknown).error.empty());
 }
 
+void test_json_parser() {
+    JsonResult r = parse_json("{\"a\": 1, \"b\": [\"x\", true, null], \"c\": {\"d\": -2}}");
+    CHECK(r.ok);
+    CHECK(json_member(r.value, "a")->number == 1);
+    const JsonValue* b = json_member(r.value, "b");
+    CHECK(b != nullptr && b->type == JsonType::Array && b->array.size() == 3);
+    CHECK(json_member(*json_member(r.value, "c"), "d")->number == -2);
+    CHECK(json_member(r.value, "b")->array[1].boolean);
+    CHECK(!parse_json("{\"x\":").ok);
+    CHECK(!parse_json("").ok);
+    CHECK(parse_json("\"a\\nb\"").value.text == "a\nb");
+    CHECK(json_type_name(JsonType::Array) == "array");
+}
+
+void test_snapshot_roundtrip() {
+    std::vector<SourceDoc> docs{
+        {"b.hpp", "#include \"a.hpp\"\n"},
+        {"a.hpp", "#include \"b.hpp\"\n"},
+        {"app.cpp", "#include \"a.hpp\"\n#include \"a.hpp\"\nWidget* p;\n"}};
+    Analysis a = analyze(docs);
+    Snapshot original = snapshot_from_analysis(a);
+    Snapshot restored;
+    std::string error;
+    CHECK(snapshot_from_json(render_json(a, 10), restored, error));
+    CHECK(original.cycles == restored.cycles);
+    CHECK(original.costs == restored.costs);
+    CHECK(original.hotspots == restored.hotspots);
+    CHECK(original.recommendations.size() == restored.recommendations.size());
+    Snapshot bad;
+    CHECK(!snapshot_from_json("not json", bad, error));
+}
+
+void test_diff() {
+    Snapshot before;
+    before.costs["app.cpp"] = 3;
+    before.hotspots["common.hpp"] = 2;
+    Snapshot after = before;
+    after.costs["app.cpp"] = 5;
+    after.cycles.push_back({"a.hpp", "b.hpp", "a.hpp"});
+    DiffReport growth = diff_snapshots(before, after);
+    CHECK(growth.regressions);
+    CHECK(growth.entries.size() == 2);
+    bool saw_cost = false;
+    bool saw_cycle = false;
+    for (const auto& e : growth.entries) {
+        if (e.kind == DiffEntry::Kind::CostUp) saw_cost = true;
+        if (e.kind == DiffEntry::Kind::CycleAdded) saw_cycle = true;
+    }
+    CHECK(saw_cost && saw_cycle);
+
+    Snapshot improved = before;
+    improved.costs["app.cpp"] = 1;
+    DiffReport better = diff_snapshots(before, improved);
+    CHECK(!better.regressions);
+    CHECK(better.entries.size() == 1);
+    CHECK(better.entries[0].kind == DiffEntry::Kind::CostDown);
+    CHECK(render_diff_text(better).find("[cost-down] app.cpp : 3 -> 1") != std::string::npos);
+    CHECK(render_diff_json(growth).find("\"regression\": true") != std::string::npos);
+}
+
+void test_paths() {
+    IncludeGraph g = build_graph({
+        {"app.cpp", "a.hpp", 1}, {"app.cpp", "direct.hpp", 2},
+        {"a.hpp", "b.hpp", 1}, {"b.hpp", "c.hpp", 1},
+        {"direct.hpp", "c.hpp", 1}});
+    std::vector<std::string> p = shortest_path(g, "app.cpp", "c.hpp");
+    CHECK(p == std::vector<std::string>({"app.cpp", "direct.hpp", "c.hpp"}));
+    std::vector<std::string> best = best_path_to(g, "c.hpp");
+    CHECK(best == p);
+    CHECK(shortest_path(g, "a.hpp", "missing.hpp").empty());
+    CHECK(shortest_path(g, "c.hpp", "app.cpp").empty());
+    CHECK(render_path_text("c.hpp", p).find("app.cpp -> direct.hpp -> c.hpp") != std::string::npos);
+    CHECK(render_path_json("c.hpp", p).find("\"path\": [") != std::string::npos);
+}
+
+void test_cli_extensions() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* why = const_cast<char*>("why");
+    char* root = const_cast<char*>("src");
+    char* target = const_cast<char*>("c.hpp");
+    char* from = const_cast<char*>("--from");
+    char* file = const_cast<char*>("app.cpp");
+    char* argv[] = {argv0, why, root, target, from, file};
+    Command c = parse_args(6, argv);
+    CHECK(c.kind == CommandKind::Why);
+    CHECK(c.root == "src" && c.target == "c.hpp" && c.from == "app.cpp");
+
+    char* diff = const_cast<char*>("diff");
+    char* baseline = const_cast<char*>("--baseline");
+    char* basefile = const_cast<char*>("base.json");
+    char* current = const_cast<char*>("--current");
+    char* regress = const_cast<char*>("--fail-on-regression");
+    char* dargv[] = {argv0, diff, baseline, basefile, current, root, regress};
+    Command d = parse_args(7, dargv);
+    CHECK(d.kind == CommandKind::Diff);
+    CHECK(d.baseline == "base.json" && d.root == "src" && d.fail_on_regression);
+    CHECK(d.error.empty());
+
+    char* bad[] = {argv0, diff, baseline, basefile};
+    CHECK(!parse_args(4, bad).error.empty());
+}
+
+void test_absolute_root_resolution() {
+    std::vector<SourceDoc> docs{
+        {"C:/tree/app.cpp", "#include \"a.hpp\"\n"},
+        {"C:/tree/a.hpp", "#include \"b.hpp\"\n"},
+        {"C:/tree/b.hpp", "struct B {};\n"}};
+    Analysis a = analyze(docs);
+    CHECK(a.graph.ids.size() == 3);
+    CHECK(a.edges.size() == 2);
+    CHECK(resolve_node(a.graph, "b.hpp") == "C:/tree/b.hpp");
+    std::vector<std::string> p = shortest_path(a.graph, "C:/tree/app.cpp", "C:/tree/b.hpp");
+    CHECK(p.size() == 3);
+    CHECK(best_path_to(a.graph, "C:/tree/b.hpp") == p);
+
+    std::vector<SourceDoc> cyclic{
+        {"C:/tree/app.cpp", "#include \"a.hpp\"\n"},
+        {"C:/tree/a.hpp", "#include \"b.hpp\"\n"},
+        {"C:/tree/b.hpp", "#include \"a.hpp\"\n"}};
+    CHECK(analyze(cyclic).cycles.size() == 1);
+}
+
 }  // namespace
 
 int main() {
@@ -235,6 +361,12 @@ int main() {
     test_analyze_and_render();
     test_json_escaping();
     test_cli();
+    test_json_parser();
+    test_snapshot_roundtrip();
+    test_diff();
+    test_paths();
+    test_cli_extensions();
+    test_absolute_root_resolution();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

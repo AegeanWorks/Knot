@@ -12,6 +12,9 @@ namespace knot::shell {
 // Returns false when the root cannot be read.
 bool load_sources(const std::string& root, std::vector<knot::core::SourceDoc>& out);
 
+// Read a baseline report from disk. The only file read outside load_sources.
+bool read_text_file(const std::string& path, std::string& text);
+
 // A built-in fixture used by `knot demo`; no file system access.
 std::vector<knot::core::SourceDoc> demo_docs();
 

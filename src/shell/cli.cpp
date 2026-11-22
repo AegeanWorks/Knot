@@ -1,7 +1,5 @@
 #include "cli.hpp"
 
-#include <cctype>
-
 namespace knot::shell {
 namespace {
 
@@ -25,12 +23,16 @@ std::string usage_text() {
            "\n"
            "Usage:\n"
            "  knot scan <dir> [--format text|json] [--top N] [--fail-on-cycle]\n"
+           "                  [--fail-on-cost N] [--fail-on-hotspot N]\n"
            "  knot cycles <dir> [--format text|json]\n"
            "  knot hotspots <dir> [--format text|json] [--top N]\n"
+           "  knot why <dir> <header> [--from <file>] [--format text|json]\n"
+           "  knot diff --baseline <file> --current <dir> [--format text|json]\n"
+           "                  [--fail-on-regression]\n"
            "  knot demo\n"
            "  knot help | knot --help | knot --version\n"
            "\n"
-           "Exit codes: 0 clean, 1 finding (--fail-on-cycle), 2 usage, 3 I/O.\n";
+           "Exit codes: 0 clean, 1 finding/regression, 2 usage, 3 I/O.\n";
 }
 
 Command parse_args(int argc, char** argv) {
@@ -55,35 +57,76 @@ Command parse_args(int argc, char** argv) {
     if (sub == "scan") cmd.kind = CommandKind::Scan;
     else if (sub == "cycles") cmd.kind = CommandKind::Cycles;
     else if (sub == "hotspots") cmd.kind = CommandKind::Hotspots;
+    else if (sub == "why") cmd.kind = CommandKind::Why;
+    else if (sub == "diff") cmd.kind = CommandKind::Diff;
     else {
         cmd.error = "unknown subcommand: " + sub;
         return cmd;
     }
 
     int index = 2;
-    if (index < argc && argv[index][0] != '-') cmd.root = argv[index++];
+    bool current_seen = false;
+    if (cmd.kind != CommandKind::Diff && index < argc && argv[index][0] != '-') {
+        cmd.root = argv[index++];
+    }
+    if (cmd.kind == CommandKind::Why) {
+        if (index >= argc) {
+            cmd.error = "why needs a target header";
+            return cmd;
+        }
+        cmd.target = argv[index++];
+    }
 
     for (; index < argc; ++index) {
         std::string flag = argv[index];
         if (flag == "--fail-on-cycle") {
             cmd.fail_on_cycle = true;
-        } else if (flag == "--format") {
+        } else if (flag == "--fail-on-regression") {
+            cmd.fail_on_regression = true;
+        } else if (flag == "--format" || flag == "--top" || flag == "--from" ||
+                   flag == "--baseline" || flag == "--current" ||
+                   flag == "--fail-on-cost" || flag == "--fail-on-hotspot") {
             if (++index >= argc) {
-                cmd.error = "--format needs text or json";
+                cmd.error = flag + " needs a value";
                 return cmd;
             }
-            cmd.format = argv[index];
-            if (cmd.format != "text" && cmd.format != "json") {
-                cmd.error = "unknown format: " + cmd.format;
-                return cmd;
-            }
-        } else if (flag == "--top") {
-            if (++index >= argc || !parse_positive(argv[index], cmd.top)) {
-                cmd.error = "--top needs a positive integer";
+            std::string value = argv[index];
+            if (flag == "--format") {
+                cmd.format = value;
+                if (cmd.format != "text" && cmd.format != "json") {
+                    cmd.error = "unknown format: " + cmd.format;
+                    return cmd;
+                }
+            } else if (flag == "--top") {
+                if (!parse_positive(value, cmd.top)) {
+                    cmd.error = "--top needs a positive integer";
+                    return cmd;
+                }
+            } else if (flag == "--from") {
+                cmd.from = value;
+            } else if (flag == "--baseline") {
+                cmd.baseline = value;
+            } else if (flag == "--current") {
+                cmd.root = value;
+                current_seen = true;
+            } else if (flag == "--fail-on-cost") {
+                if (!parse_positive(value, cmd.fail_cost)) {
+                    cmd.error = "--fail-on-cost needs a positive integer";
+                    return cmd;
+                }
+            } else if (!parse_positive(value, cmd.fail_hotspot)) {
+                cmd.error = "--fail-on-hotspot needs a positive integer";
                 return cmd;
             }
         } else {
             cmd.error = "unknown flag: " + flag;
+            return cmd;
+        }
+    }
+
+    if (cmd.kind == CommandKind::Diff) {
+        if (cmd.baseline.empty() || !current_seen) {
+            cmd.error = "diff needs --baseline <file> and --current <dir>";
             return cmd;
         }
     }

@@ -74,6 +74,10 @@ bool load_sources(const std::string& root, std::vector<knot::core::SourceDoc>& o
     return true;
 }
 
+bool read_text_file(const std::string& path, std::string& text) {
+    return read_file(fs::path(path), text);
+}
+
 std::vector<knot::core::SourceDoc> demo_docs() {
     return {
         {"app.cpp",

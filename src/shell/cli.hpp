@@ -6,14 +6,20 @@
 
 namespace knot::shell {
 
-enum class CommandKind { Scan, Cycles, Hotspots, Demo, Help, Version };
+enum class CommandKind { Scan, Cycles, Hotspots, Why, Diff, Demo, Help, Version };
 
 struct Command {
     CommandKind kind = CommandKind::Help;
     std::string root = ".";
+    std::string target;
+    std::string from;
+    std::string baseline;
     std::string format = "text";
     std::size_t top = 10;
+    std::size_t fail_cost = 0;
+    std::size_t fail_hotspot = 0;
     bool fail_on_cycle = false;
+    bool fail_on_regression = false;
     std::string error;
 };
 

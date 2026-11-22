@@ -1,6 +1,7 @@
 #include "report.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <sstream>
 
 #include "graph.hpp"
@@ -8,6 +9,42 @@
 
 namespace knot::core {
 namespace {
+
+std::string folded(std::string value) {
+    for (char& c : value) {
+        if (c == '\\') c = '/';
+        else c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+    return value;
+}
+
+bool ends_with_segment(const std::string& path, const std::string& suffix) {
+    return path.size() > suffix.size() &&
+           path[path.size() - suffix.size() - 1] == '/' &&
+           path.compare(path.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+// Map a header as written to a scanned document when possible. Absolute roots
+// otherwise create two nodes for one file (the source path and the include
+// string), which would hide cycles and break path queries. Pure and total.
+std::string resolve_header(const std::string& from, const std::string& header,
+                           const std::vector<std::string>& paths) {
+    std::string wanted = folded(header);
+    std::size_t slash = folded(from).find_last_of('/');
+    std::string sibling = slash == std::string::npos ? wanted : folded(from).substr(0, slash + 1) + wanted;
+    for (const auto& path : paths) {
+        if (folded(path) == sibling) return path;
+    }
+    std::string unique;
+    for (const auto& path : paths) {
+        std::string candidate = folded(path);
+        if (candidate == wanted || ends_with_segment(candidate, wanted)) {
+            if (!unique.empty()) return header;  // ambiguous: keep the literal include
+            unique = path;
+        }
+    }
+    return unique.empty() ? header : unique;
+}
 
 std::string json_escape(const std::string& value) {
     std::string out;
@@ -54,8 +91,11 @@ Analysis analyze(std::vector<SourceDoc> docs) {
     });
     Analysis a;
     a.docs = docs;
+    std::vector<std::string> paths;
+    for (const auto& doc : docs) paths.push_back(doc.path);
     for (const auto& doc : docs) {
         std::vector<IncludeEdge> found = scan_includes(doc.text, doc.path);
+        for (auto& edge : found) edge.header = resolve_header(edge.from, edge.header, paths);
         a.edges.insert(a.edges.end(), found.begin(), found.end());
     }
     a.graph = build_graph(a.edges);

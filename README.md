@@ -2,7 +2,7 @@
 
 [![Built with AIKit](https://img.shields.io/badge/built%20with-AIKit-6f42c1)](https://github.com/AegeanWorks/AIKit)
 
-Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, and recommends forward declarations as deterministic, actionable reports.
+Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, diffs a tree against a recorded baseline to catch coupling regressions, and recommends forward declarations as deterministic, actionable reports.
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
@@ -14,13 +14,16 @@ Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parse
 
 ### What it does
 
-Point Knot at a C/C++ tree and it answers three questions a compiler will not
+Point Knot at a C/C++ tree and it answers five questions a compiler will not
 tell you directly:
 
 1. Which headers form an include cycle? (`cycles`)
 2. How expensive is each file — how many distinct headers does it pull in? (`scan`, cost column)
 3. Which headers are included far too often, and which includes could become a
    forward declaration? (`hotspots`, `scan`, recommendations)
+4. *Why* is a header here — what is the shortest include chain from a translation
+   unit to it? (`why`)
+5. Did coupling grow since a recorded baseline? (`diff --baseline ... --current ...`)
 
 Output is deterministic: input documents are sorted by path, graph nodes and
 recommendations are sorted by stable keys, and the JSON schema is versioned.
@@ -30,14 +33,20 @@ The same tree always produces the same report, so Knot can be a CI gate.
 
 ```text
 knot scan <dir> [--format text|json] [--top N] [--fail-on-cycle]
+                  [--fail-on-cost N] [--fail-on-hotspot N]
 knot cycles <dir> [--format text|json]
 knot hotspots <dir> [--format text|json] [--top N]
+knot why <dir> <header> [--from <file>] [--format text|json]
+knot diff --baseline <file> --current <dir> [--format text|json]
+                  [--fail-on-regression]
 knot demo
 knot help | knot --help | knot --version
 ```
 
-`--fail-on-cycle` exits `1` when a cycle is found, otherwise `0`.
-Exit codes: `0` clean, `1` finding, `2` usage error, `3` I/O error.
+CI flags exit `1` on a finding: `--fail-on-cycle`, `--fail-on-cost N`,
+`--fail-on-hotspot N`, `--fail-on-regression`. A baseline is any
+`knot scan <dir> --format json` report saved to a file.
+Exit codes: `0` clean, `1` finding/regression, `2` usage/bad baseline, `3` I/O error.
 
 ```text
 $ knot demo
@@ -62,10 +71,18 @@ Recommendations (3):
   edge, calls the pure core, and writes at the edge.
 - **Explicit state machines**: the include lexer (15 states), the iterative DFS
   cycle detector (white/gray/black marks + frame stack), the identifier scanner,
-  and the transitive-cost worklist. No hidden recursion drives analysis state.
+  the transitive-cost worklist, the BFS path search (`path_step`), and the JSON
+  lexer (`json_lex_step`). No hidden recursion drives analysis state.
+- **Pure snapshot diff**: `render_json` output parses back through `parse_json`
+  into the same `Snapshot` (property test), and `diff_snapshots` reports added
+  cycles, cost/hotspot changes and recommendation changes deterministically.
+- **Include resolution**: relative quoted includes are matched to scanned
+  documents by path suffix before graph construction, so an absolute scan root
+  never creates two nodes for one file.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 74 checks cover comments, strings, malformed directives,
-  self/2/3-node cycles, duplicate recommendations, JSON escaping and CLI errors.
+  their outputs; 115 checks cover comments, strings, malformed directives,
+  self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
+  round-trips, path queries, regression verdicts and CLI errors.
 
 ### 🛠️ AIKit Commands (run from the AIKit folder)
 
@@ -96,7 +113,13 @@ knot/
 ├── src/core/graph.hpp        <- graph and state-machine declarations
 ├── src/core/graph.cpp        <- DFS, cost, fan-in, heuristic transitions
 ├── src/core/report.hpp       <- analyze() and renderer declarations
-├── src/core/report.cpp       <- pure text/JSON renderers
+├── src/core/report.cpp       <- pure text/JSON renderers + include resolution
+├── src/core/path.hpp         <- BFS path query declarations
+├── src/core/path.cpp         <- path_step, resolve_node, path renderers
+├── src/core/json.hpp         <- minimal JSON value types
+├── src/core/json.cpp         <- JSON lexer state machine + parser
+├── src/core/diff.hpp         <- snapshot and diff declarations
+├── src/core/diff.cpp         <- snapshot reader, diff verdict, renderers
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration
