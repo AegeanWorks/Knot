@@ -157,6 +157,7 @@ knot/
 ├── LICENSES/                 <- REUSE license texts
 ├── REUSE.toml                <- Machine-readable SPDX metadata
 ├── README.md
+├── assets/                   <- approved logo and social preview
 ├── src/                      <- C++17 implementation: pure core + shell
 ├── scripts/                  <- build and test entry points
 ├── tests/                    <- zero-dependency test harness
