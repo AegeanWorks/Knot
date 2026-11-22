@@ -22,320 +22,6 @@
   },
   "checkpoints": [
     {
-      "task_id": "knot-multi-root",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] README, ADR-010, map and consolidated audit updated; 5/5 gates pass and 190 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795331943.3269331,
-      "timestamp_str": "2026-11-22 10:19:03",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-multi-root",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-multi-root' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795331964.0461483,
-      "timestamp_str": "2026-11-22 10:19:24",
-      "agent": "opencode:ses_dff2f155",
-      "head": "3b13d311d65d6bb124ae2f86deee2b0e0cbc3385",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
-    {
-      "task_id": "knot-robustness-fuzz",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: add a seeded, deterministic fuzz harness that feeds generated text through every lexer/parser state machine and the full analyze pipeline, asserting termination and no crashes.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795332328.3348598,
-      "timestamp_str": "2026-11-22 10:25:28",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "State machines are only trustworthy if every transition is total; generated input explores combinations hand-written tests miss and can expose underflow or non-termination before users do.",
-        "benefits": "A reproducible robustness gate with no new dependency, plus fixes for any defect it exposes.",
-        "risks": "contract: test-only changes unless a defect is found; dependency: none; concurrency: none; state: the generator must be seeded so failures are reproducible.",
-        "mitigation": "Fixed LCG seed, 500 generated cases per target, bounded assertions, golden regression for any found defect, full gate run before commit."
-      },
-      "plan_digest": "bbc14230ae3936653e61fa7ff9dd9786f5c8512d2e7bfce42e7fcb2ded52f6cf",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-robustness-fuzz",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Test-only: seeded 500-case generated-input harness; 690 checks green, no production defect exposed.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795332481.8941302,
-      "timestamp_str": "2026-11-22 10:28:01",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-robustness-fuzz",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] Shell: no new I/O path; robustness is enforced inside the existing test gate; report documents the native-library guard interaction.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795332489.575283,
-      "timestamp_str": "2026-11-22 10:28:09",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-robustness-fuzz",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] README, ADR-011 and consolidated audit updated; 5/5 gates pass and 690 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795332497.3360682,
-      "timestamp_str": "2026-11-22 10:28:17",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-robustness-fuzz",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-robustness-fuzz' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795332505.9143784,
-      "timestamp_str": "2026-11-22 10:28:25",
-      "agent": "opencode:ses_dff2f155",
-      "head": "4203468c10f6c188961949f5beca2d444242f40d",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
-    {
-      "task_id": "knot-csv-export",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: add pure CSV renderers for costs, hotspots and recommendations plus a 'knot csv' subcommand.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795332575.7784214,
-      "timestamp_str": "2026-11-22 10:29:35",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "JSON is good for tools but awkward for spreadsheets and issue attachments; a CSV surface makes the same deterministic data easy to sort and share.",
-        "benefits": "One more output format with no dependency, correct escaping, and the same stability guarantees as the JSON report.",
-        "risks": "contract: a new subcommand and --kind flag; dependency: none; concurrency: none; state: rendering is pure and reuses the already-sorted analysis fields.",
-        "mitigation": "Golden CSV tests including embedded commas/quotes/newlines, CLI parse tests, full gates before commit."
-      },
-      "plan_digest": "426f0e81570a9d5d3e6beaf6412a67e42be5768c120a02733279a7b3b9cea8d6",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-csv-export",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Pure core: CSV renderers with RFC-style quoting; 697 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795333350.1445308,
-      "timestamp_str": "2026-11-22 10:42:30",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-csv-export",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] Shell: knot csv with --kind validation; self-scan produces a sorted costs table.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795333357.2180398,
-      "timestamp_str": "2026-11-22 10:42:37",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-csv-export",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] README, ADR-012, map and consolidated audit updated; 5/5 gates pass and 697 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795337039.459969,
-      "timestamp_str": "2026-11-22 11:43:59",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-csv-export",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-csv-export' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795337048.3259366,
-      "timestamp_str": "2026-11-22 11:44:08",
-      "agent": "opencode:ses_dff2f155",
-      "head": "4a974693353c4af309cd72b24596392c82b40bf1",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
-    {
-      "task_id": "knot-html-report",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: add a pure self-contained HTML renderer (stats, cycles, tables, DOT source) and a 'knot report' command that writes it at the edge.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795337114.7792559,
-      "timestamp_str": "2026-11-22 11:45:14",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "A terminal report is hard to share with people who are not running Knot; a standalone HTML file makes the same deterministic findings reviewable in a browser or CI artifact.",
-        "benefits": "A shareable, dependency-free report with no network resources and the same sort order as every other surface.",
-        "risks": "contract: new subcommand and HTML output; dependency: none; concurrency: none; state: rendering is pure with strict escaping.",
-        "mitigation": "Golden tests for HTML escaping and determinism, overwrite guard at the edge, full gates before commit."
-      },
-      "plan_digest": "c57bfefef8e20451d26733804628a67c91af2c6eac42c3cdfe09b8bba5e8e8c8",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-html-report",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Pure core: render_html with strict escaping and embedded DOT; 703 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795337311.075869,
-      "timestamp_str": "2026-11-22 11:48:31",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-html-report",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] Shell: knot report with overwrite guard; standalone HTML verified in a temp directory.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795337319.0291088,
-      "timestamp_str": "2026-11-22 11:48:39",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-html-report",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] README, ADR-013, map and consolidated audit updated; 5/5 gates pass and 703 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795337379.177236,
-      "timestamp_str": "2026-11-22 11:49:39",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-html-report",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-html-report' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795337386.995953,
-      "timestamp_str": "2026-11-22 11:49:46",
-      "agent": "opencode:ses_dff2f155",
-      "head": "c7d2170fd558c7d62348029a3c84269fae8e97b0",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
-    {
       "task_id": "knot-brand-and-publish",
       "phase": "phase 2",
       "phase_num": 2,
@@ -393,6 +79,210 @@
         ],
         "forced": false
       }
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge run",
+      "phase_num": 3,
+      "description": "run started (start=6, step=6, stop=None)",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795347613.0450745,
+      "timestamp_str": "2026-11-22 14:40:13",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 1",
+      "phase_num": 3,
+      "description": "Reforge stage 1: window 6, 6 commit(s), 12 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795347619.7791135,
+      "timestamp_str": "2026-11-22 14:40:19",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 1",
+      "phase_num": 3,
+      "description": "Reforge stage 1: stage 1 host review reviewed; run active; coverage 23/23",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795347803.737174,
+      "timestamp_str": "2026-11-22 14:43:23",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 2",
+      "phase_num": 3,
+      "description": "Reforge stage 2: window 12, 6 commit(s), 13 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795347823.3027046,
+      "timestamp_str": "2026-11-22 14:43:43",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 2",
+      "phase_num": 3,
+      "description": "Reforge stage 2: stage 2 host review reviewed; run active; coverage 46/46",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348109.510858,
+      "timestamp_str": "2026-11-22 14:48:29",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 2",
+      "phase_num": 3,
+      "description": "Reforge stage 2: stage 2 host review reviewed; run active; coverage 46/46",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348171.2575085,
+      "timestamp_str": "2026-11-22 14:49:31",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 3",
+      "phase_num": 3,
+      "description": "Reforge stage 3: window 18, 6 commit(s), 16 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348275.3786404,
+      "timestamp_str": "2026-11-22 14:51:15",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 3",
+      "phase_num": 3,
+      "description": "Reforge stage 3: stage 3 host review reviewed; run active; coverage 51/51",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348470.8964784,
+      "timestamp_str": "2026-11-22 14:54:30",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 3",
+      "phase_num": 3,
+      "description": "Reforge stage 3: stage 3 host review reviewed; run active; coverage 51/51",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348522.5610943,
+      "timestamp_str": "2026-11-22 14:55:22",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 4",
+      "phase_num": 3,
+      "description": "Reforge stage 4: window 24, 6 commit(s), 14 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348533.3158028,
+      "timestamp_str": "2026-11-22 14:55:33",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 4",
+      "phase_num": 3,
+      "description": "Reforge stage 4: stage 4 host review reviewed; run active; coverage 43/43",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348623.9818747,
+      "timestamp_str": "2026-11-22 14:57:03",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 4",
+      "phase_num": 3,
+      "description": "Reforge stage 4: stage 4 host review reviewed; run active; coverage 43/43",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348671.5666544,
+      "timestamp_str": "2026-11-22 14:57:51",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 5",
+      "phase_num": 3,
+      "description": "Reforge stage 5: window 30, 6 commit(s), 22 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348683.2255125,
+      "timestamp_str": "2026-11-22 14:58:03",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 5",
+      "phase_num": 3,
+      "description": "Reforge stage 5: stage 5 host review reviewed; run active; coverage 75/75",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348959.6502147,
+      "timestamp_str": "2026-11-22 15:02:39",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 5",
+      "phase_num": 3,
+      "description": "Reforge stage 5: stage 5 host review reviewed; run active; coverage 75/75",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795349008.6655211,
+      "timestamp_str": "2026-11-22 15:03:28",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 6",
+      "phase_num": 3,
+      "description": "Reforge stage 6: window 32, 2 commit(s), 31 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795349022.9008548,
+      "timestamp_str": "2026-11-22 15:03:42",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 6",
+      "phase_num": 3,
+      "description": "Reforge stage 6: stage 6 host review reviewed; run completed; coverage 26/26",
+      "files_affected": [],
+      "status": "completed",
+      "timestamp": 1795349104.3455458,
+      "timestamp_str": "2026-11-22 15:05:04",
+      "agent": "opencode",
+      "operator_task": "knot-brand-and-publish"
     }
   ]
 }
