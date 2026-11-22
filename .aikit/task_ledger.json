@@ -1,13 +1,13 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "knot-robustness-fuzz",
+    "task_id": "knot-csv-export",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1795332497.3360682,
+    "updated_at": 1795337039.459969,
     "owner": "opencode:ses_dff2f155",
-    "lease_until": 1795339697.3360682,
+    "lease_until": 1795344239.459969,
     "started_by": "opencode:ses_dff2f155",
     "continuations": [],
     "workspaces": [
@@ -16,104 +16,11 @@
         "path": "projects/knot"
       }
     ],
-    "completed_at": 1795332505.8485096,
-    "completed_head": "4203468c10f6c188961949f5beca2d444242f40d",
-    "completed_tree": "d738f945b06b1a93a2bad906f71099cb84edf2fc"
+    "completed_at": 1795337048.2624135,
+    "completed_head": "4a974693353c4af309cd72b24596392c82b40bf1",
+    "completed_tree": "2d2b59290ca3947462a6fbd4dea499c5674cc333"
   },
   "checkpoints": [
-    {
-      "task_id": "knot-baseline-lifecycle",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: add knot baseline <dir> <file> [--force] that writes a complete JSON snapshot from a pure renderer, with an overwrite guard at the I/O edge.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795329850.3599331,
-      "timestamp_str": "2026-11-22 09:44:10",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "Regressions are only useful if a reviewed state can be promoted to the new baseline; requiring manual shell redirection invites truncated or stale baselines.",
-        "benefits": "A complete, deterministic baseline in one command, protected from accidental overwrite, with the same round-trip guarantees as scan --format json.",
-        "risks": "contract: a new subcommand and complete-snapshot renderer; dependency: none; concurrency: none; state: generation stays pure, write guarded.",
-        "mitigation": "Pure render_baseline_json with a round-trip test that every node is captured; refuse overwrite without --force; smoke on a fixture; full gates before commit."
-      },
-      "plan_digest": "268c84d336236b94a4a210542646921b02e8836cd68b7317fe4abe4d11893e6b",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-baseline-lifecycle",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Pure core: render_baseline_json complete snapshot; round-trip test over a 16-node graph; 174 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795330324.915567,
-      "timestamp_str": "2026-11-22 09:52:04",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-baseline-lifecycle",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] Shell: knot baseline with overwrite guard; smoke shows exit 0/2 and a clean diff against the written file.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795330331.781575,
-      "timestamp_str": "2026-11-22 09:52:11",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-baseline-lifecycle",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] README, ADR-008, map and consolidated audit updated; 5/5 gates pass and 174 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795330383.043422,
-      "timestamp_str": "2026-11-22 09:53:03",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-baseline-lifecycle",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-baseline-lifecycle' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795330393.8105142,
-      "timestamp_str": "2026-11-22 09:53:13",
-      "agent": "opencode:ses_dff2f155",
-      "head": "94838fbe5632dd6a6404688c9fa1c95e2ec1d889",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
     {
       "task_id": "knot-stats",
       "phase": "phase 2",
@@ -386,6 +293,99 @@
       "timestamp_str": "2026-11-22 10:28:25",
       "agent": "opencode:ses_dff2f155",
       "head": "4203468c10f6c188961949f5beca2d444242f40d",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "knot-csv-export",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: add pure CSV renderers for costs, hotspots and recommendations plus a 'knot csv' subcommand.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795332575.7784214,
+      "timestamp_str": "2026-11-22 10:29:35",
+      "agent": "opencode:ses_dff2f155",
+      "impact_assessment": {
+        "why": "JSON is good for tools but awkward for spreadsheets and issue attachments; a CSV surface makes the same deterministic data easy to sort and share.",
+        "benefits": "One more output format with no dependency, correct escaping, and the same stability guarantees as the JSON report.",
+        "risks": "contract: a new subcommand and --kind flag; dependency: none; concurrency: none; state: rendering is pure and reuses the already-sorted analysis fields.",
+        "mitigation": "Golden CSV tests including embedded commas/quotes/newlines, CLI parse tests, full gates before commit."
+      },
+      "plan_digest": "426f0e81570a9d5d3e6beaf6412a67e42be5768c120a02733279a7b3b9cea8d6",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-csv-export",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] Pure core: CSV renderers with RFC-style quoting; 697 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795333350.1445308,
+      "timestamp_str": "2026-11-22 10:42:30",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-csv-export",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] Shell: knot csv with --kind validation; self-scan produces a sorted costs table.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795333357.2180398,
+      "timestamp_str": "2026-11-22 10:42:37",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-csv-export",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] README, ADR-012, map and consolidated audit updated; 5/5 gates pass and 697 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795337039.459969,
+      "timestamp_str": "2026-11-22 11:43:59",
+      "agent": "opencode:ses_dff2f155",
+      "checklists": "passed",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-csv-export",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'knot-csv-export' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795337048.3259366,
+      "timestamp_str": "2026-11-22 11:44:08",
+      "agent": "opencode:ses_dff2f155",
+      "head": "4a974693353c4af309cd72b24596392c82b40bf1",
       "delivery": {
         "roots": [
           "."
