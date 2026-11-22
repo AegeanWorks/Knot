@@ -1,13 +1,13 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "knot-missing-includes",
+    "task_id": "knot-init-scaffold",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1795314740.4332929,
+    "updated_at": 1795315219.6920607,
     "owner": "opencode:ses_dff2f155",
-    "lease_until": 1795321940.4332929,
+    "lease_until": 1795322419.6920607,
     "started_by": "opencode:ses_dff2f155",
     "continuations": [],
     "workspaces": [
@@ -16,104 +16,11 @@
         "path": "projects/knot"
       }
     ],
-    "completed_at": 1795314748.339101,
-    "completed_head": "853d2d63d9dbf0527b48e90d9f965d76245089e8",
-    "completed_tree": "443507a2fdfaffbfa5573f7a07da9d85555a489a"
+    "completed_at": 1795315228.498326,
+    "completed_head": "2724040c96635e2c794acc6e1cd4d4a3bbf44ffc",
+    "completed_tree": "4969d45a0d8aa66774edea86c73f9ad63346f7de"
   },
   "checkpoints": [
-    {
-      "task_id": "knot-impact-and-export",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/5] Plan: add reverse impact analysis (who is affected when a header changes) and DOT/Mermaid graph export; both pure, both with explicit state machines and deterministic output.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795313071.4286134,
-      "timestamp_str": "2026-11-22 05:04:31",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "A cycle report tells you a header is tangled, but a maintainer needs the reverse closure to know what to rebuild and retest, plus a visual export to review coupling with other people.",
-        "benefits": "Impact sets make blast radius explicit before a header edit; DOT/Mermaid export makes the graph reviewable in CI artifacts and documentation without adding a dependency.",
-        "risks": "contract: two new subcommands and two export formats; dependency: none (C++17 stdlib only); concurrency: none; state: reverse BFS must be an explicit state machine with deterministic ordering.",
-        "mitigation": "Pure reverse-graph construction and impact_step state machine; golden output tests for DOT/Mermaid; snapshot the exact output in tests; run all AIKit gates before commit."
-      },
-      "plan_digest": "eb7cf72e5f8afca2092778410ddd6859ce863ecebf423a8ef174fc811bd09999",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-impact-and-export",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/5] Pure core: reverse_graph + impact_step BFS and DOT/Mermaid renderers; 133 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795313311.4685078,
-      "timestamp_str": "2026-11-22 05:08:31",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-impact-and-export",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/5] Shell: impact and graph subcommands, format validation, node resolution; smoke confirms reverse closure and stable DOT/Mermaid output.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795313318.1366465,
-      "timestamp_str": "2026-11-22 05:08:38",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-impact-and-export",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/5] README, ADR-003, codebase map and consolidated AIKit audit updated; 5/5 gates pass and 133 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795313359.0740182,
-      "timestamp_str": "2026-11-22 05:09:19",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-impact-and-export",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-impact-and-export' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795313375.1800866,
-      "timestamp_str": "2026-11-22 05:09:35",
-      "agent": "opencode:ses_dff2f155",
-      "head": "2a42970079de43a47e5ba144524e9ac7d9e62af5",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
     {
       "task_id": "knot-ignore-rules",
       "phase": "phase 2",
@@ -386,6 +293,99 @@
       "timestamp_str": "2026-11-22 05:32:28",
       "agent": "opencode:ses_dff2f155",
       "head": "853d2d63d9dbf0527b48e90d9f965d76245089e8",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "knot-init-scaffold",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: add knot init to write starter .knotignore and .knot-policy, keeping content generation pure and file writes at the edge.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795314942.4361427,
+      "timestamp_str": "2026-11-22 05:35:42",
+      "agent": "opencode:ses_dff2f155",
+      "impact_assessment": {
+        "why": "A new user has to discover the policy and ignore file syntax before getting value; zero-friction onboarding is part of the architectural brief.",
+        "benefits": "One command produces a documented starting point that the user can edit; content is generated by a pure function so it is testable without touching disk.",
+        "risks": "contract: two generated files and --force semantics; dependency: none; concurrency: none; state: generation is pure, writes guarded so existing files are never overwritten silently.",
+        "mitigation": "Golden content tests, refusal on existing files without --force, smoke in a temp directory, full gate run before commit."
+      },
+      "plan_digest": "2e20d38d72974eca1b65d97c57af2a61c79c2702ecebfb2b3cd1824a6f44a054",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-init-scaffold",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] Pure core: default_ignore_text/default_policy_text generators; 168 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795315164.5062737,
+      "timestamp_str": "2026-11-22 05:39:24",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-init-scaffold",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] Shell: knot init with --force guard, write at the edge; overwrite refusal and forced write verified in a temp directory.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795315171.319883,
+      "timestamp_str": "2026-11-22 05:39:31",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-init-scaffold",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] README, ADR-007, map and consolidated audit updated; 5/5 gates pass and 168 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795315219.6920607,
+      "timestamp_str": "2026-11-22 05:40:19",
+      "agent": "opencode:ses_dff2f155",
+      "checklists": "passed",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-init-scaffold",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'knot-init-scaffold' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795315228.5566685,
+      "timestamp_str": "2026-11-22 05:40:28",
+      "agent": "opencode:ses_dff2f155",
+      "head": "2724040c96635e2c794acc6e1cd4d4a3bbf44ffc",
       "delivery": {
         "roots": [
           "."
