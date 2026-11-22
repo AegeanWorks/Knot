@@ -1,13 +1,13 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "knot-html-report",
+    "task_id": "knot-brand-and-publish",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1795337379.177236,
+    "updated_at": 1795339221.3359995,
     "owner": "opencode:ses_dff2f155",
-    "lease_until": 1795344579.177236,
+    "lease_until": 1795346421.3359995,
     "started_by": "opencode:ses_dff2f155",
     "continuations": [],
     "workspaces": [
@@ -16,69 +16,11 @@
         "path": "projects/knot"
       }
     ],
-    "completed_at": 1795337386.9322934,
-    "completed_head": "c7d2170fd558c7d62348029a3c84269fae8e97b0",
-    "completed_tree": "2937ff23e60cd55a6da4f4dc6f312cc1b353705f"
+    "completed_at": 1795339223.9286532,
+    "completed_head": "6d62019d1292cf318d188a95e2b0dd5adf5ce5e8",
+    "completed_tree": "bc91e6e6918af82abf5a5a7c8b6f2749b0fdb150"
   },
   "checkpoints": [
-    {
-      "task_id": "knot-multi-root",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: add repeatable --root so one command scans several trees; qualify paths with the root's directory name when more than one root is given.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795331294.0080423,
-      "timestamp_str": "2026-11-22 10:08:14",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "Monorepos need one report across several source trees; scanning them separately loses cycles and shared-header cost that cross the boundary.",
-        "benefits": "A single deterministic graph across roots, with collision-free node names and one policy/baseline for the whole workspace.",
-        "risks": "contract: --root flag and path qualification; dependency: none; concurrency: none; state: qualification must be deterministic and applied only when scanning multiple roots.",
-        "mitigation": "Pure qualify helper with golden tests, CLI parse tests, two-directory smoke showing distinct paths, full gate run before commit."
-      },
-      "plan_digest": "7d62063848d468ebb15381a2823199923ff3f1d805d75f848a5c4d0ce9c53bb6",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-multi-root",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Pure core: qualify_path with trailing-separator fix; 190 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795331842.2988667,
-      "timestamp_str": "2026-11-22 10:17:22",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-multi-root",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] Shell: repeatable --root across all scan commands; two-directory smoke shows distinct qualified paths and a combined graph.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795331850.7210424,
-      "timestamp_str": "2026-11-22 10:17:30",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
     {
       "task_id": "knot-multi-root",
       "phase": "phase 4",
@@ -386,6 +328,65 @@
       "timestamp_str": "2026-11-22 11:49:46",
       "agent": "opencode:ses_dff2f155",
       "head": "c7d2170fd558c7d62348029a3c84269fae8e97b0",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "knot-brand-and-publish",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Plan: approve and apply brand assets, fix the README tree, publish the public repository and push the verified tree.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795339210.6481762,
+      "timestamp_str": "2026-11-22 12:20:10",
+      "agent": "opencode:ses_dff2f155",
+      "impact_assessment": {
+        "why": "Publishing required a brand manifest and reviewed assets; the user authorized push, so the two resulting commits need a ledger task before the gated push can run.",
+        "benefits": "A clean delivery record for the publication commits and an explicit push through AIKit's gate.",
+        "risks": "contract: repository URL and topics; dependency: GitHub CLI authentication; concurrency: none; state: ledger staleness blocks push until a task is open.",
+        "mitigation": "Record a short task, run the gates, push through aikit.py push, verify HEAD equals origin/master."
+      },
+      "plan_digest": "12e844232324bee3657474da11bbf3d1424201a8e023568ae1016ee91ad0483f",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-brand-and-publish",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Brand assets approved and applied, README tree fixed, public repository created at AegeanWorks/Knot; gates green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795339221.3359995,
+      "timestamp_str": "2026-11-22 12:20:21",
+      "agent": "opencode:ses_dff2f155",
+      "checklists": "passed",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-brand-and-publish",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'knot-brand-and-publish' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795339224.2640696,
+      "timestamp_str": "2026-11-22 12:20:24",
+      "agent": "opencode:ses_dff2f155",
+      "head": "6d62019d1292cf318d188a95e2b0dd5adf5ce5e8",
       "delivery": {
         "roots": [
           "."
