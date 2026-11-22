@@ -1,13 +1,13 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "knot-include-graph",
+    "task_id": "knot-path-and-diff",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1795311322.1276433,
+    "updated_at": 1795312987.405821,
     "owner": "opencode:ses_dff2f155",
-    "lease_until": 1795318522.1276433,
+    "lease_until": 1795320187.405821,
     "started_by": "opencode:ses_dff2f155",
     "continuations": [],
     "workspaces": [
@@ -16,9 +16,9 @@
         "path": "projects/knot"
       }
     ],
-    "completed_at": 1795311463.8529239,
-    "completed_head": "1965959574e3838b183f2cd27864142f8093b26c",
-    "completed_tree": "890ff3f56aac947e8273b3542db9a2fa652e9f46"
+    "completed_at": 1795313014.5318,
+    "completed_head": "047939316faae966a9a3c07a925e218b9ea03e4c",
+    "completed_tree": "92e77c2f7839cd6ebfdd771b3d767cf3d1fc5c00"
   },
   "checkpoints": [
     {
@@ -107,6 +107,99 @@
       "timestamp_str": "2026-11-22 04:37:44",
       "agent": "opencode:ses_dff2f155",
       "head": "1965959574e3838b183f2cd27864142f8093b26c",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "knot-path-and-diff",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/5] Plan: add shortest include-path queries (knot why), a pure JSON snapshot reader and deterministic baseline diff (knot diff), plus CI thresholds; keep core pure and all stateful traversals as explicit state machines.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795311932.3668382,
+      "timestamp_str": "2026-11-22 04:45:32",
+      "agent": "opencode:ses_dff2f155",
+      "impact_assessment": {
+        "why": "Finding a cycle is only half the job: programmers need to know the exact chain that pulls a header in, and CI needs to detect that header coupling grew since a recorded baseline.",
+        "benefits": "Actionable 'why is this header here' answers and a golden-baseline regression gate that makes include-graph growth visible before it lands.",
+        "risks": "contract: new CLI flags and a versioned snapshot schema; dependency: none (C++17 stdlib only); concurrency: none; state: BFS and JSON lexing must be explicit state machines, not hidden mutable state.",
+        "mitigation": "Pure BFS/json_step/transition functions with deterministic tie-breaking; property test that render_json output parses back to the same snapshot; fail-first tests for diff verdicts; full AIKit gate run before commit."
+      },
+      "plan_digest": "db3c4485c7c28849bf8f190603296cfe9526d01750c4c9af896a6e2065e0f7a4",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-path-and-diff",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/5] Pure core additions: BFS path state machine, JSON lexer + parser, snapshot/diff model, include resolution for absolute roots; 115 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795312895.129538,
+      "timestamp_str": "2026-11-22 05:01:35",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-path-and-diff",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/5] Shell additions: why/diff subcommands, CI threshold flags, baseline file read at the edge; end-to-end smoke proves path output and regression exit 1.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795312928.8969488,
+      "timestamp_str": "2026-11-22 05:02:08",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-path-and-diff",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/5] README/ADR-002/codebase map updated, AIKit audit report extended; 5/5 gates pass and 115 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795312987.405821,
+      "timestamp_str": "2026-11-22 05:03:07",
+      "agent": "opencode:ses_dff2f155",
+      "checklists": "passed",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-path-and-diff",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'knot-path-and-diff' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795313014.6571183,
+      "timestamp_str": "2026-11-22 05:03:34",
+      "agent": "opencode:ses_dff2f155",
+      "head": "047939316faae966a9a3c07a925e218b9ea03e4c",
       "delivery": {
         "roots": [
           "."
