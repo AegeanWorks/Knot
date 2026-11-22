@@ -27,6 +27,7 @@ std::string usage_text() {
            "                  [--ignore <file>]\n"
            "  knot cycles <dir> [--format text|json]\n"
            "  knot hotspots <dir> [--format text|json] [--top N]\n"
+           "  knot stats <dir> [--format text|json]\n"
            "  knot why <dir> <header> [--from <file>] [--format text|json]\n"
            "  knot impact <dir> <header> [--format text|json]\n"
            "  knot graph <dir> [--format dot|mermaid]\n"
@@ -63,6 +64,7 @@ Command parse_args(int argc, char** argv) {
     if (sub == "scan") cmd.kind = CommandKind::Scan;
     else if (sub == "cycles") cmd.kind = CommandKind::Cycles;
     else if (sub == "hotspots") cmd.kind = CommandKind::Hotspots;
+    else if (sub == "stats") cmd.kind = CommandKind::Stats;
     else if (sub == "why") cmd.kind = CommandKind::Why;
     else if (sub == "diff") cmd.kind = CommandKind::Diff;
     else if (sub == "impact") cmd.kind = CommandKind::Impact;

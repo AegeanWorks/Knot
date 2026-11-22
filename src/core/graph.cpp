@@ -18,17 +18,18 @@ bool is_alnum(char c) {
 
 bool is_space(char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; }
 
+bool ends_with(const std::string& path, const std::string& suffix) {
+    return path.size() >= suffix.size() &&
+           path.compare(path.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 bool is_translation_unit(const std::string& path) {
-    return path.size() > 4 && (path.substr(path.size() - 4) == ".cpp" ||
-                               path.substr(path.size() - 3) == ".cc" ||
-                               path.substr(path.size() - 4) == ".cxx");
+    return ends_with(path, ".cpp") || ends_with(path, ".cc") || ends_with(path, ".cxx");
 }
 
 bool is_header(const std::string& path) {
-    return path.size() > 2 && (path.substr(path.size() - 2) == ".h" ||
-                               path.substr(path.size() - 4) == ".hpp" ||
-                               path.substr(path.size() - 3) == ".hh" ||
-                               path.substr(path.size() - 4) == ".hxx");
+    return ends_with(path, ".h") || ends_with(path, ".hpp") ||
+           ends_with(path, ".hh") || ends_with(path, ".hxx");
 }
 
 }  // namespace

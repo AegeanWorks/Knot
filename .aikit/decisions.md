@@ -67,3 +67,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: Baselines produced by hand with shell redirection could be truncated by top-N output or overwritten accidentally, making regression checks unreliable.
 - **Decision**: render_baseline_json emits a complete snapshot by passing the graph size as the top-N limit; 'knot baseline <dir> <file>' writes it at the I/O edge with an overwrite guard requiring --force.
 - **Consequences**: A 16-node fixture round-tripped all 16 cost entries through snapshot_from_json; a smoke test showed exit 0 on first write, exit 2 on an unforced second write, and a clean diff against the saved file; six new checks bring the suite to 174.
+
+### ADR-009: Add project stats and fix short-name suffix underflow
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: A project-level metrics view was missing, and the first real scan of Knot's own root crashed in a suffix helper that underflowed on short names.
+- **Decision**: compute_stats classifies files and edges and finds the deepest include chain with the existing bounded BFS; the graph.cpp suffix helpers now use length-guarded comparisons instead of substr(size - N).
+- **Consequences**: A debug build under gdb proved the fix, and the release smoke now reports 33 files, 135 edges and a 4-hop deepest chain on Knot itself; a regression test covers one-character and non-header names; 184 checks pass.

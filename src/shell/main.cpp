@@ -11,6 +11,7 @@
 #include "core/policy.hpp"
 #include "core/report.hpp"
 #include "core/scaffold.hpp"
+#include "core/stats.hpp"
 #include "files.hpp"
 
 namespace {
@@ -160,6 +161,15 @@ int main(int argc, char** argv) {
                                          : knot::core::render_violations_text(violations);
         if (!knot::shell::write_stdout(rendered)) return 3;
         return violations.empty() ? 0 : 1;
+    }
+
+    if (cmd.kind == knot::shell::CommandKind::Stats) {
+        const knot::core::Stats stats = knot::core::compute_stats(analysis);
+        const std::string rendered = cmd.format == "json"
+                                         ? knot::core::render_stats_json(stats)
+                                         : knot::core::render_stats_text(stats);
+        if (!knot::shell::write_stdout(rendered)) return 3;
+        return 0;
     }
 
     if (cmd.kind == knot::shell::CommandKind::Baseline) {

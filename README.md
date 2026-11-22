@@ -14,7 +14,7 @@ Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parse
 
 ### What it does
 
-Point Knot at a C/C++ tree and it answers nine questions a compiler will not
+Point Knot at a C/C++ tree and it answers ten questions a compiler will not
 tell you directly:
 
 1. Which headers form an include cycle? (`cycles`)
@@ -30,6 +30,8 @@ tell you directly:
    an in-repository `.knot-policy`)
 9. Did I forget to include the header that defines a type I used? (`scan`,
    advisory `add-include` recommendations)
+10. How deep and how coupled is the tree overall? (`stats`, including the
+    deterministic deepest include chain)
 
 Output is deterministic: input documents are sorted by path, graph nodes and
 recommendations are sorted by stable keys, and the JSON schema is versioned.
@@ -42,6 +44,7 @@ knot scan <dir> [--format text|json] [--top N] [--fail-on-cycle]
                   [--fail-on-cost N] [--fail-on-hotspot N]
 knot cycles <dir> [--format text|json]
 knot hotspots <dir> [--format text|json] [--top N]
+knot stats <dir> [--format text|json]
 knot why <dir> <header> [--from <file>] [--format text|json]
 knot impact <dir> <header> [--format text|json]
 knot graph <dir> [--format dot|mermaid]
@@ -117,7 +120,7 @@ Recommendations (3):
   walker applies them to paths relative to the scan root, so one rule set is
   shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 174 checks cover comments, strings, malformed directives,
+  their outputs; 184 checks cover comments, strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 
@@ -169,6 +172,8 @@ knot/
 ├── src/core/missing.cpp      <- pure used-type / header reachability check
 ├── src/core/scaffold.hpp     <- starter configuration generators
 ├── src/core/scaffold.cpp     <- pure .knotignore/.knot-policy content
+├── src/core/stats.hpp        <- project metrics declarations
+├── src/core/stats.cpp        <- pure counts + deepest chain via BFS
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration

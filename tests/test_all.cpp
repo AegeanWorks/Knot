@@ -15,6 +15,7 @@
 #include "core/policy.hpp"
 #include "core/report.hpp"
 #include "core/scaffold.hpp"
+#include "core/stats.hpp"
 #include "shell/cli.hpp"
 
 namespace {
@@ -573,6 +574,42 @@ void test_cli_baseline() {
     CHECK(!parse_args(3, missing).error.empty());
 }
 
+void test_stats() {
+    std::vector<SourceDoc> docs{
+        {"app.cpp", "#include \"a.hpp\"\n#include <vector>\n"},
+        {"a.hpp", "#include \"b.hpp\"\n"},
+        {"b.hpp", "#include \"c.hpp\"\n"},
+        {"c.hpp", "struct C {};\n"}};
+    Stats stats = compute_stats(analyze(docs));
+    CHECK(stats.files == 4 && stats.translation_units == 1 && stats.headers == 3);
+    CHECK(stats.edges == 4 && stats.internal_edges == 3 && stats.external_edges == 1);
+    CHECK(stats.max_depth == 3);
+    CHECK(stats.deepest_chain == std::vector<std::string>({"app.cpp", "a.hpp", "b.hpp", "c.hpp"}));
+    CHECK(render_stats_text(stats).find("3 internal, 1 external") != std::string::npos);
+    CHECK(render_stats_json(stats).find("\"max_depth\": 3") != std::string::npos);
+}
+
+void test_short_names() {
+    std::vector<SourceDoc> docs{
+        {"a.h", "struct A {};\n"},
+        {"app.cpp", "#include \"a.h\"\n"}};
+    Analysis a = analyze(docs);
+    CHECK(a.edges.size() == 1);
+    CHECK(compute_stats(a).files == 2);
+    CHECK(analyze({{"x.y", "struct X {};\n"},
+                   {"app.cpp", "#include \"x.y\"\n"}}).graph.ids.size() == 2);
+}
+
+void test_cli_stats() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* stats = const_cast<char*>("stats");
+    char* dir = const_cast<char*>("src");
+    char* argv[] = {argv0, stats, dir};
+    Command c = parse_args(3, argv);
+    CHECK(c.kind == CommandKind::Stats && c.root == "src" && c.error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -606,6 +643,9 @@ int main() {
     test_cli_init();
     test_baseline_completeness();
     test_cli_baseline();
+    test_stats();
+    test_short_names();
+    test_cli_stats();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }
