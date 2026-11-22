@@ -125,7 +125,9 @@ Recommendations (3):
   walker applies them to paths relative to the scan root, so one rule set is
   shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 190 checks cover comments, strings, malformed directives,
+  their outputs; 690 checks include a seeded 500-case generated-input harness
+  that drives every state machine and the whole pipeline, plus comments,
+  strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 
@@ -187,7 +189,7 @@ knot/
 ├── src/shell/files.cpp       <- file reads, demo fixture, stdout writes
 ├── src/shell/main.cpp        <- imperative wiring and exit codes
 ├── scripts/test.cmd          <- canonical regression gate (build + tests + demo)
-├── tests/test_all.cpp        <- zero-dependency test harness, 74 checks
+├── tests/test_all.cpp        <- zero-dependency harness, 690 checks + fuzz
 ├── inventory.py              <- AIKit compat scaffold (ADR-315), not implementation
 ├── demo.py                   <- AIKit compat scaffold (ADR-315), not implementation
 └── .aikit/                   <- this project's memory: record, ledger, decisions

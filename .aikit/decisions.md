@@ -81,3 +81,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: A monorepo's cross-tree include cycles and shared-header cost were invisible when each source tree was analysed separately.
 - **Decision**: Repeatable --root gathers several trees into one graph; the pure qualify_path helper prefixes paths with the root directory name when more than one root is given, leaving single-root output unchanged.
 - **Consequences**: A two-directory fixture produced distinct one/app.cpp and two/app.cpp nodes and a combined 4-file report; six new checks bring the suite to 190; configuration files are still read from the first root, so one policy governs the combined graph.
+
+### ADR-011: Add a seeded generated-input robustness gate
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: Explicit state machines must be total over arbitrary bytes; hand-written examples cannot cover the cross-product of lexer, JSON, glob and policy inputs.
+- **Decision**: A fixed-seed LCG drives 500 generated strings through every transition function and the whole analyze/render pipeline in the test binary, asserting termination and that a snapshot diff against itself is empty.
+- **Consequences**: No defect was found; the suite grew from 190 to 690 checks with no production change, giving a reproducible robustness signal on every gate run.

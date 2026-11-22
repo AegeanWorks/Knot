@@ -633,6 +633,53 @@ void test_cli_multi_root() {
     CHECK(s.roots == std::vector<std::string>({"a"}));
 }
 
+// Deterministic generated-input harness: every state machine must be total.
+struct Rng {
+    unsigned state;
+    explicit Rng(unsigned seed) : state(seed) {}
+    unsigned next() {
+        state = state * 1664525u + 1013904223u;
+        return state;
+    }
+};
+
+std::string random_text(Rng& rng, std::size_t length, const std::string& alphabet) {
+    std::string out;
+    for (std::size_t i = 0; i < length; ++i) {
+        out.push_back(alphabet[rng.next() % alphabet.size()]);
+    }
+    return out;
+}
+
+void test_generated_inputs() {
+    const std::string alphabet = "#<>\"\\/*! \n\tabcXYZ012_.:-";
+    Rng rng(20261122u);
+    for (int i = 0; i < 500; ++i) {
+        std::string text = random_text(rng, rng.next() % 120, alphabet);
+        (void)scan_includes(text, "f.cpp");
+        JsonResult json = parse_json(text);
+        if (json.ok) (void)json_member(json.value, "x");
+        (void)scan_identifiers(text);
+        std::string pattern = random_text(rng, rng.next() % 20, "*?abc/ ");
+        (void)glob_match(pattern, text);
+        (void)parse_ignore(text);
+        (void)parse_policy(text);
+
+        std::vector<SourceDoc> docs{SourceDoc{"f.cpp", text}};
+        Analysis a = analyze(docs);
+        (void)render_text(a, 5);
+        (void)render_json(a, 5);
+        (void)render_baseline_json(a);
+        (void)compute_stats(a);
+        (void)missing_includes(a);
+        (void)render_dot(a);
+        (void)render_mermaid(a);
+        DiffReport same = diff_snapshots(snapshot_from_analysis(a),
+                                         snapshot_from_analysis(a));
+        CHECK(!same.regressions && same.entries.empty());
+    }
+}
+
 }  // namespace
 
 int main() {
@@ -671,6 +718,7 @@ int main() {
     test_cli_stats();
     test_path_qualification();
     test_cli_multi_root();
+    test_generated_inputs();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }
