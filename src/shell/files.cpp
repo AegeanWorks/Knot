@@ -7,6 +7,8 @@
 #include <sstream>
 #include <system_error>
 
+#include "core/paths.hpp"
+
 namespace fs = std::filesystem;
 
 namespace knot::shell {
@@ -43,12 +45,6 @@ bool read_file(const fs::path& path, std::string& text) {
     return true;
 }
 
-std::string normalise(fs::path path) {
-    std::string value = path.generic_string();
-    while (value.size() > 2 && value.compare(0, 2, "./") == 0) value = value.substr(2);
-    return value;
-}
-
 }  // namespace
 
 bool file_exists(const std::string& path) {
@@ -63,29 +59,36 @@ bool write_text_file(const std::string& path, const std::string& text) {
     return static_cast<bool>(out);
 }
 
-bool load_sources(const std::string& root, const knot::core::IgnoreRules& rules,
+bool load_sources(const std::vector<std::string>& roots,
+                  const knot::core::IgnoreRules& rules,
                   std::vector<knot::core::SourceDoc>& out) {
-    std::error_code ec;
-    if (!fs::is_directory(root, ec)) return false;
+    if (roots.empty()) return false;
+    const bool multiple = roots.size() > 1;
+    std::vector<std::pair<fs::path, std::string>> entries;
 
-    std::vector<fs::path> paths;
-    for (fs::recursive_directory_iterator it(root, fs::directory_options::skip_permission_denied, ec),
-         end; it != end && !ec; it.increment(ec)) {
-        if (is_skipped(it->path())) continue;
-        if (!it->is_regular_file(ec)) continue;
-        if (!is_source(it->path().string())) continue;
-        std::string relative = fs::relative(it->path(), root, ec).generic_string();
+    for (const auto& root : roots) {
+        std::error_code ec;
+        if (!fs::is_directory(root, ec)) return false;
+        for (fs::recursive_directory_iterator it(root, fs::directory_options::skip_permission_denied, ec),
+             end; it != end && !ec; it.increment(ec)) {
+            if (is_skipped(it->path())) continue;
+            if (!it->is_regular_file(ec)) continue;
+            if (!is_source(it->path().string())) continue;
+            std::string relative = fs::relative(it->path(), root, ec).generic_string();
+            if (ec) return false;
+            if (knot::core::is_ignored(rules, relative)) continue;
+            entries.push_back({it->path(),
+                               knot::core::qualify_path(root, relative, multiple)});
+        }
         if (ec) return false;
-        if (knot::core::is_ignored(rules, relative)) continue;
-        paths.push_back(it->path());
     }
-    if (ec) return false;
-    std::sort(paths.begin(), paths.end());
+    std::sort(entries.begin(), entries.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
 
-    for (const auto& path : paths) {
+    for (const auto& entry : entries) {
         std::string text;
-        if (!read_file(path, text)) return false;
-        out.push_back(knot::core::SourceDoc{normalise(path), text});
+        if (!read_file(entry.first, text)) return false;
+        out.push_back(knot::core::SourceDoc{entry.second, text});
     }
     return true;
 }

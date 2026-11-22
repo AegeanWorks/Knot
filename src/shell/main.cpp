@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
             return 2;
         }
         std::vector<knot::core::SourceDoc> docs;
-        if (!knot::shell::load_sources(cmd.root, load_rules(cmd), docs)) {
+        if (!knot::shell::load_sources(cmd.roots, load_rules(cmd), docs)) {
             knot::shell::write_stderr("knot: cannot read directory: " + cmd.root + "\n");
             return 3;
         }
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
     std::vector<knot::core::SourceDoc> docs;
     if (cmd.kind == knot::shell::CommandKind::Demo) {
         docs = knot::shell::demo_docs();
-    } else if (!knot::shell::load_sources(cmd.root, load_rules(cmd), docs)) {
+    } else if (!knot::shell::load_sources(cmd.roots, load_rules(cmd), docs)) {
         knot::shell::write_stderr("knot: cannot read directory: " + cmd.root + "\n");
         return 3;
     }
@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
             return 2;
         }
         std::vector<knot::core::SourceDoc> docs;
-        if (!knot::shell::load_sources(cmd.root, load_rules(cmd), docs)) {
+        if (!knot::shell::load_sources(cmd.roots, load_rules(cmd), docs)) {
             knot::shell::write_stderr("knot: cannot read directory: " + cmd.root + "\n");
             return 3;
         }

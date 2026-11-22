@@ -11,7 +11,8 @@ namespace knot::shell {
 
 // Recursively load C/C++ source and header files under `root`, sorted by path.
 // Returns false when the root cannot be read.
-bool load_sources(const std::string& root, const knot::core::IgnoreRules& rules,
+bool load_sources(const std::vector<std::string>& roots,
+                  const knot::core::IgnoreRules& rules,
                   std::vector<knot::core::SourceDoc>& out);
 
 // Read a baseline report from disk. The only file read outside load_sources.

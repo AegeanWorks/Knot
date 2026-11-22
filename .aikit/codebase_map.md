@@ -14,7 +14,7 @@
 
 ## 🧭 Map Coverage
 - **Indexed**: python (`2` module(s))
-- **Not indexed by this map**: cpp (`33` file(s))
+- **Not indexed by this map**: cpp (`35` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 

@@ -12,6 +12,7 @@
 #include "core/json.hpp"
 #include "core/lexer.hpp"
 #include "core/path.hpp"
+#include "core/paths.hpp"
 #include "core/policy.hpp"
 #include "core/report.hpp"
 #include "core/scaffold.hpp"
@@ -610,6 +611,28 @@ void test_cli_stats() {
     CHECK(c.kind == CommandKind::Stats && c.root == "src" && c.error.empty());
 }
 
+void test_path_qualification() {
+    CHECK(qualify_path("a", "src/x.cpp", false) == "src/x.cpp");
+    CHECK(qualify_path("C:/work/a", "src/x.cpp", true) == "a/src/x.cpp");
+    CHECK(qualify_path("a/", "x.cpp", true) == "a/x.cpp");
+}
+
+void test_cli_multi_root() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* scan = const_cast<char*>("scan");
+    char* root_flag = const_cast<char*>("--root");
+    char* a = const_cast<char*>("a");
+    char* b = const_cast<char*>("b");
+    char* argv[] = {argv0, scan, root_flag, a, root_flag, b};
+    Command c = parse_args(6, argv);
+    CHECK(c.roots == std::vector<std::string>({"a", "b"}));
+    CHECK(c.root == "a" && c.error.empty());
+    char* single[] = {argv0, scan, a};
+    Command s = parse_args(3, single);
+    CHECK(s.roots == std::vector<std::string>({"a"}));
+}
+
 }  // namespace
 
 int main() {
@@ -646,6 +669,8 @@ int main() {
     test_stats();
     test_short_names();
     test_cli_stats();
+    test_path_qualification();
+    test_cli_multi_root();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

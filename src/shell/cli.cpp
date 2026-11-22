@@ -39,6 +39,8 @@ std::string usage_text() {
            "  knot demo\n"
            "  knot help | knot --help | knot --version\n"
            "\n"
+           "  --root <dir>          repeatable: scan several trees in one graph\n"
+           "\n"
            "Exit codes: 0 clean, 1 finding/regression, 2 usage, 3 I/O.\n";
 }
 
@@ -108,7 +110,7 @@ Command parse_args(int argc, char** argv) {
             cmd.force = true;
         } else if (flag == "--format" || flag == "--top" || flag == "--from" ||
                    flag == "--baseline" || flag == "--current" || flag == "--ignore" ||
-                   flag == "--policy" ||
+                   flag == "--policy" || flag == "--root" ||
                    flag == "--fail-on-cost" || flag == "--fail-on-hotspot") {
             if (++index >= argc) {
                 cmd.error = flag + " needs a value";
@@ -146,6 +148,8 @@ Command parse_args(int argc, char** argv) {
                 cmd.ignore_file = value;
             } else if (flag == "--policy") {
                 cmd.policy_file = value;
+            } else if (flag == "--root") {
+                cmd.roots.push_back(value);
             } else if (flag == "--current") {
                 cmd.root = value;
                 current_seen = true;
@@ -163,6 +167,9 @@ Command parse_args(int argc, char** argv) {
             return cmd;
         }
     }
+
+    if (cmd.roots.empty()) cmd.roots.push_back(cmd.root);
+    else cmd.root = cmd.roots[0];
 
     if (cmd.kind == CommandKind::Diff) {
         if (cmd.baseline.empty() || !current_seen) {

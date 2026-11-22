@@ -57,6 +57,11 @@ knot demo
 knot help | knot --help | knot --version
 ```
 
+Every scan command accepts repeatable `--root <dir>` to build one graph across
+several source trees. With more than one root, paths are prefixed by the root's
+directory name (`one/app.cpp`, `two/app.cpp`) so identical relative paths do
+not collide. With one root, paths are unchanged.
+
 A `.knotignore` file at the scan root is applied automatically; use
 `--ignore <file>` for another rule file. Rules support `#` comments, `*` and
 `?` (no `/` crossing), `**` (crosses `/`), directory rules like `vendor/`,
@@ -120,7 +125,7 @@ Recommendations (3):
   walker applies them to paths relative to the scan root, so one rule set is
   shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 184 checks cover comments, strings, malformed directives,
+  their outputs; 190 checks cover comments, strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 
@@ -174,6 +179,8 @@ knot/
 ├── src/core/scaffold.cpp     <- pure .knotignore/.knot-policy content
 ├── src/core/stats.hpp        <- project metrics declarations
 ├── src/core/stats.cpp        <- pure counts + deepest chain via BFS
+├── src/core/paths.hpp        <- multi-root path qualification
+├── src/core/paths.cpp        <- pure qualified-path rule
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration

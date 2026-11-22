@@ -74,3 +74,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: A project-level metrics view was missing, and the first real scan of Knot's own root crashed in a suffix helper that underflowed on short names.
 - **Decision**: compute_stats classifies files and edges and finds the deepest include chain with the existing bounded BFS; the graph.cpp suffix helpers now use length-guarded comparisons instead of substr(size - N).
 - **Consequences**: A debug build under gdb proved the fix, and the release smoke now reports 33 files, 135 edges and a 4-hop deepest chain on Knot itself; a regression test covers one-character and non-header names; 184 checks pass.
+
+### ADR-010: Support multi-root scans for monorepos
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: A monorepo's cross-tree include cycles and shared-header cost were invisible when each source tree was analysed separately.
+- **Decision**: Repeatable --root gathers several trees into one graph; the pure qualify_path helper prefixes paths with the root directory name when more than one root is given, leaving single-root output unchanged.
+- **Consequences**: A two-directory fixture produced distinct one/app.cpp and two/app.cpp nodes and a combined 4-file report; six new checks bring the suite to 190; configuration files are still read from the first root, so one policy governs the combined graph.
