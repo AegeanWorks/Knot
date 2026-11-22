@@ -60,3 +60,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: New users had to learn the policy and ignore syntax before getting a useful result; the project brief requires zero-friction onboarding.
 - **Decision**: Pure generators produce starter .knotignore and .knot-policy content; the shell writes them at the I/O edge and refuses to overwrite without --force.
 - **Consequences**: One command produces an editable, documented starting configuration; a temp-directory smoke showed exit 0 on first run, exit 2 on a second run without --force and exit 0 with it; four new checks bring the suite to 168.
+
+### ADR-008: Add a complete-snapshot baseline command
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: Baselines produced by hand with shell redirection could be truncated by top-N output or overwritten accidentally, making regression checks unreliable.
+- **Decision**: render_baseline_json emits a complete snapshot by passing the graph size as the top-N limit; 'knot baseline <dir> <file>' writes it at the I/O edge with an overwrite guard requiring --force.
+- **Consequences**: A 16-node fixture round-tripped all 16 cost entries through snapshot_from_json; a smoke test showed exit 0 on first write, exit 2 on an unforced second write, and a clean diff against the saved file; six new checks bring the suite to 174.

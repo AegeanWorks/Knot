@@ -540,6 +540,39 @@ void test_cli_init() {
     CHECK(c.kind == CommandKind::Init && c.force && c.root == "src" && c.error.empty());
 }
 
+void test_baseline_completeness() {
+    std::vector<SourceDoc> docs;
+    std::string includes;
+    for (int i = 0; i < 15; ++i) {
+        std::string name = "h" + std::to_string(i) + ".hpp";
+        docs.push_back(SourceDoc{name, "struct T {};\n"});
+        includes += "#include \"" + name + "\"\n";
+    }
+    docs.push_back(SourceDoc{"app.cpp", includes});
+    Analysis a = analyze(docs);
+    CHECK(a.graph.ids.size() > 10);
+    Snapshot restored;
+    std::string error;
+    CHECK(snapshot_from_json(render_baseline_json(a), restored, error));
+    CHECK(restored.costs.size() == a.graph.ids.size());
+    CHECK(render_json(a, 10).find("\"costs\": [") != std::string::npos);
+}
+
+void test_cli_baseline() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* baseline = const_cast<char*>("baseline");
+    char* dir = const_cast<char*>("src");
+    char* file = const_cast<char*>("base.json");
+    char* force = const_cast<char*>("--force");
+    char* argv[] = {argv0, baseline, dir, file, force};
+    Command c = parse_args(5, argv);
+    CHECK(c.kind == CommandKind::Baseline && c.root == "src" &&
+          c.baseline == "base.json" && c.force && c.error.empty());
+    char* missing[] = {argv0, baseline, dir};
+    CHECK(!parse_args(3, missing).error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -571,6 +604,8 @@ int main() {
     test_missing_includes();
     test_scaffold();
     test_cli_init();
+    test_baseline_completeness();
+    test_cli_baseline();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

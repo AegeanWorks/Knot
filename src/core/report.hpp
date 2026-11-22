@@ -25,4 +25,7 @@ Analysis analyze(std::vector<SourceDoc> docs);
 std::string render_text(const Analysis& a, std::size_t top);
 std::string render_json(const Analysis& a, std::size_t top);
 
+// A complete snapshot: no top-N truncation, safe to use as a CI baseline.
+std::string render_baseline_json(const Analysis& a);
+
 }  // namespace knot::core

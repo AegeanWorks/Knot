@@ -47,6 +47,7 @@ knot impact <dir> <header> [--format text|json]
 knot graph <dir> [--format dot|mermaid]
 knot check <dir> [--policy <file>] [--format text|json]
 knot init <dir> [--force]
+knot baseline <dir> <file> [--force]
 knot diff --baseline <file> --current <dir> [--format text|json]
                   [--fail-on-regression]
 knot demo
@@ -69,7 +70,9 @@ sorted, deterministic list with text and JSON output.
 
 CI flags exit `1` on a finding: `--fail-on-cycle`, `--fail-on-cost N`,
 `--fail-on-hotspot N`, `--fail-on-regression`. A baseline is any
-`knot scan <dir> --format json` report saved to a file.
+`knot scan <dir> --format json` report saved to a file; `knot baseline <dir>
+<file>` writes a complete one without top-N truncation and refuses to overwrite
+unless `--force` is given.
 Exit codes: `0` clean, `1` finding/regression, `2` usage/bad baseline, `3` I/O error.
 
 ```text
@@ -114,7 +117,7 @@ Recommendations (3):
   walker applies them to paths relative to the scan root, so one rule set is
   shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 168 checks cover comments, strings, malformed directives,
+  their outputs; 174 checks cover comments, strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 

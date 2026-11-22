@@ -194,4 +194,8 @@ std::string render_json(const Analysis& a, std::size_t top) {
     return os.str();
 }
 
+std::string render_baseline_json(const Analysis& a) {
+    return render_json(a, a.graph.ids.size());
+}
+
 }  // namespace knot::core

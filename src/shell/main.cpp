@@ -162,6 +162,27 @@ int main(int argc, char** argv) {
         return violations.empty() ? 0 : 1;
     }
 
+    if (cmd.kind == knot::shell::CommandKind::Baseline) {
+        if (!cmd.force && knot::shell::file_exists(cmd.baseline)) {
+            knot::shell::write_stderr(
+                "knot: baseline already exists; pass --force to overwrite\n");
+            return 2;
+        }
+        std::vector<knot::core::SourceDoc> docs;
+        if (!knot::shell::load_sources(cmd.root, load_rules(cmd), docs)) {
+            knot::shell::write_stderr("knot: cannot read directory: " + cmd.root + "\n");
+            return 3;
+        }
+        const knot::core::Analysis analysis = knot::core::analyze(std::move(docs));
+        if (!knot::shell::write_text_file(cmd.baseline,
+                                          knot::core::render_baseline_json(analysis))) {
+            knot::shell::write_stderr("knot: cannot write baseline: " + cmd.baseline + "\n");
+            return 3;
+        }
+        knot::shell::write_stdout("knot: wrote baseline " + cmd.baseline + "\n");
+        return 0;
+    }
+
     if (cmd.kind == knot::shell::CommandKind::Graph) {
         const std::string rendered = cmd.format == "mermaid"
                                          ? knot::core::render_mermaid(analysis)

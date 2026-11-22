@@ -32,6 +32,7 @@ std::string usage_text() {
            "  knot graph <dir> [--format dot|mermaid]\n"
            "  knot check <dir> [--policy <file>] [--format text|json]\n"
            "  knot init <dir> [--force]\n"
+           "  knot baseline <dir> <file> [--force]\n"
            "  knot diff --baseline <file> --current <dir> [--format text|json]\n"
            "                  [--fail-on-regression]\n"
            "  knot demo\n"
@@ -68,6 +69,7 @@ Command parse_args(int argc, char** argv) {
     else if (sub == "graph") cmd.kind = CommandKind::Graph;
     else if (sub == "check") cmd.kind = CommandKind::Check;
     else if (sub == "init") cmd.kind = CommandKind::Init;
+    else if (sub == "baseline") cmd.kind = CommandKind::Baseline;
     else {
         cmd.error = "unknown subcommand: " + sub;
         return cmd;
@@ -77,6 +79,13 @@ Command parse_args(int argc, char** argv) {
     bool current_seen = false;
     if (cmd.kind != CommandKind::Diff && index < argc && argv[index][0] != '-') {
         cmd.root = argv[index++];
+    }
+    if (cmd.kind == CommandKind::Baseline) {
+        if (index >= argc) {
+            cmd.error = "baseline needs an output file";
+            return cmd;
+        }
+        cmd.baseline = argv[index++];
     }
     if (cmd.kind == CommandKind::Why || cmd.kind == CommandKind::Impact) {
         if (index >= argc) {
