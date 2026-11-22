@@ -1,13 +1,13 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "knot-stats",
+    "task_id": "knot-multi-root",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1795330892.7879121,
+    "updated_at": 1795331943.3269331,
     "owner": "opencode:ses_dff2f155",
-    "lease_until": 1795338092.7879121,
+    "lease_until": 1795339143.3269331,
     "started_by": "opencode:ses_dff2f155",
     "continuations": [],
     "workspaces": [
@@ -16,104 +16,11 @@
         "path": "projects/knot"
       }
     ],
-    "completed_at": 1795330933.8108153,
-    "completed_head": "431820ce1bec00665358c2ab3db2af209d7cb950",
-    "completed_tree": "c963c198da6f226d276c6ec16180890d746a5c32"
+    "completed_at": 1795331963.8023949,
+    "completed_head": "3b13d311d65d6bb124ae2f86deee2b0e0cbc3385",
+    "completed_tree": "b3ca2fd473deb4d9e374249579190d82b8f88953"
   },
   "checkpoints": [
-    {
-      "task_id": "knot-missing-includes",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/5] Plan: add advisory detection of used types whose defining internal header is not reachable from the translation unit, reusing the pure identifier scanner and path query.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795314429.5650895,
-      "timestamp_str": "2026-11-22 05:27:09",
-      "agent": "opencode:ses_dff2f155",
-      "impact_assessment": {
-        "why": "A very common C++ error is using a type whose header was never included (or was only included transitively elsewhere); compilers report it far from the cause.",
-        "benefits": "Actionable 'consider including X.hpp' advice derived from the same inspectable graph, with no compiler or third-party tooling.",
-        "risks": "contract: a new recommendation kind and render label; dependency: none; concurrency: none; state: the analysis stays pure and uses the existing path query.",
-        "mitigation": "Advisory-only wording, restrict candidates to scanned headers and exact type identifiers, golden tests for included vs missing cases, full gates before commit."
-      },
-      "plan_digest": "223939aef521c5a1c295ed7bdc178b3b40dbb59eb3cb64bfa4c7bc69e7f2a19c",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-missing-includes",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/5] Pure core: missing_includes reuses identifier scanner and path query; add-include kind in renderers and snapshots; 164 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795314669.0214756,
-      "timestamp_str": "2026-11-22 05:31:09",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-missing-includes",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/5] Shell: no new I/O path; advisory surfaced through the existing scan renderer; fixture smoke confirms add-include appears only when the header is unreachable.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795314676.44735,
-      "timestamp_str": "2026-11-22 05:31:16",
-      "agent": "opencode:ses_dff2f155",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-missing-includes",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/5] README, ADR-006, map and consolidated audit updated; 5/5 gates pass and 164 checks green.",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795314740.4332929,
-      "timestamp_str": "2026-11-22 05:32:20",
-      "agent": "opencode:ses_dff2f155",
-      "checklists": "passed",
-      "workspaces": [
-        {
-          "name": "knot",
-          "path": "projects/knot"
-        }
-      ]
-    },
-    {
-      "task_id": "knot-missing-includes",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'knot-missing-includes' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795314748.4005082,
-      "timestamp_str": "2026-11-22 05:32:28",
-      "agent": "opencode:ses_dff2f155",
-      "head": "853d2d63d9dbf0527b48e90d9f965d76245089e8",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
     {
       "task_id": "knot-init-scaffold",
       "phase": "phase 2",
@@ -386,6 +293,99 @@
       "timestamp_str": "2026-11-22 10:02:15",
       "agent": "opencode:ses_dff2f155",
       "head": "431820ce1bec00665358c2ab3db2af209d7cb950",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "knot-multi-root",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: add repeatable --root so one command scans several trees; qualify paths with the root's directory name when more than one root is given.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795331294.0080423,
+      "timestamp_str": "2026-11-22 10:08:14",
+      "agent": "opencode:ses_dff2f155",
+      "impact_assessment": {
+        "why": "Monorepos need one report across several source trees; scanning them separately loses cycles and shared-header cost that cross the boundary.",
+        "benefits": "A single deterministic graph across roots, with collision-free node names and one policy/baseline for the whole workspace.",
+        "risks": "contract: --root flag and path qualification; dependency: none; concurrency: none; state: qualification must be deterministic and applied only when scanning multiple roots.",
+        "mitigation": "Pure qualify helper with golden tests, CLI parse tests, two-directory smoke showing distinct paths, full gate run before commit."
+      },
+      "plan_digest": "7d62063848d468ebb15381a2823199923ff3f1d805d75f848a5c4d0ce9c53bb6",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-multi-root",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] Pure core: qualify_path with trailing-separator fix; 190 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795331842.2988667,
+      "timestamp_str": "2026-11-22 10:17:22",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-multi-root",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] Shell: repeatable --root across all scan commands; two-directory smoke shows distinct qualified paths and a combined graph.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795331850.7210424,
+      "timestamp_str": "2026-11-22 10:17:30",
+      "agent": "opencode:ses_dff2f155",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-multi-root",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] README, ADR-010, map and consolidated audit updated; 5/5 gates pass and 190 checks green.",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795331943.3269331,
+      "timestamp_str": "2026-11-22 10:19:03",
+      "agent": "opencode:ses_dff2f155",
+      "checklists": "passed",
+      "workspaces": [
+        {
+          "name": "knot",
+          "path": "projects/knot"
+        }
+      ]
+    },
+    {
+      "task_id": "knot-multi-root",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'knot-multi-root' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795331964.0461483,
+      "timestamp_str": "2026-11-22 10:19:24",
+      "agent": "opencode:ses_dff2f155",
+      "head": "3b13d311d65d6bb124ae2f86deee2b0e0cbc3385",
       "delivery": {
         "roots": [
           "."
