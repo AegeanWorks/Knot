@@ -24,6 +24,7 @@ std::string usage_text() {
            "Usage:\n"
            "  knot scan <dir> [--format text|json] [--top N] [--fail-on-cycle]\n"
            "                  [--fail-on-cost N] [--fail-on-hotspot N]\n"
+           "                  [--ignore <file>]\n"
            "  knot cycles <dir> [--format text|json]\n"
            "  knot hotspots <dir> [--format text|json] [--top N]\n"
            "  knot why <dir> <header> [--from <file>] [--format text|json]\n"
@@ -89,7 +90,7 @@ Command parse_args(int argc, char** argv) {
         } else if (flag == "--fail-on-regression") {
             cmd.fail_on_regression = true;
         } else if (flag == "--format" || flag == "--top" || flag == "--from" ||
-                   flag == "--baseline" || flag == "--current" ||
+                   flag == "--baseline" || flag == "--current" || flag == "--ignore" ||
                    flag == "--fail-on-cost" || flag == "--fail-on-hotspot") {
             if (++index >= argc) {
                 cmd.error = flag + " needs a value";
@@ -123,6 +124,8 @@ Command parse_args(int argc, char** argv) {
                 cmd.from = value;
             } else if (flag == "--baseline") {
                 cmd.baseline = value;
+            } else if (flag == "--ignore") {
+                cmd.ignore_file = value;
             } else if (flag == "--current") {
                 cmd.root = value;
                 current_seen = true;

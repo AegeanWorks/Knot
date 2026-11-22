@@ -6,6 +6,7 @@
 #include "core/diff.hpp"
 #include "core/export.hpp"
 #include "core/impact.hpp"
+#include "core/ignore.hpp"
 #include "core/path.hpp"
 #include "core/report.hpp"
 #include "files.hpp"
@@ -26,6 +27,20 @@ bool exceeds(const std::vector<knot::core::Hotspot>& hotspots, std::size_t limit
         if (hot.included_by > limit) return true;
     }
     return false;
+}
+
+knot::core::IgnoreRules load_rules(const knot::shell::Command& cmd) {
+    knot::core::IgnoreRules rules = knot::core::parse_ignore(
+        ".git/\n.aikit/\nnode_modules/\nbuild/\n");
+    const std::string path = cmd.ignore_file.empty()
+                                 ? cmd.root + "/.knotignore"
+                                 : cmd.ignore_file;
+    if (!knot::shell::file_exists(path)) return rules;
+    std::string text;
+    if (!knot::shell::read_text_file(path, text)) return rules;
+    knot::core::IgnoreRules user = knot::core::parse_ignore(text);
+    rules.insert(rules.end(), user.begin(), user.end());
+    return rules;
 }
 
 }  // namespace
@@ -61,7 +76,7 @@ int main(int argc, char** argv) {
             return 2;
         }
         std::vector<knot::core::SourceDoc> docs;
-        if (!knot::shell::load_sources(cmd.root, docs)) {
+        if (!knot::shell::load_sources(cmd.root, load_rules(cmd), docs)) {
             knot::shell::write_stderr("knot: cannot read directory: " + cmd.root + "\n");
             return 3;
         }
@@ -78,7 +93,7 @@ int main(int argc, char** argv) {
     std::vector<knot::core::SourceDoc> docs;
     if (cmd.kind == knot::shell::CommandKind::Demo) {
         docs = knot::shell::demo_docs();
-    } else if (!knot::shell::load_sources(cmd.root, docs)) {
+    } else if (!knot::shell::load_sources(cmd.root, load_rules(cmd), docs)) {
         knot::shell::write_stderr("knot: cannot read directory: " + cmd.root + "\n");
         return 3;
     }

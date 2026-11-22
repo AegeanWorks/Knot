@@ -2,7 +2,7 @@
 
 [![Built with AIKit](https://img.shields.io/badge/built%20with-AIKit-6f42c1)](https://github.com/AegeanWorks/AIKit)
 
-Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, reports the reverse blast radius of changing a header, diffs a tree against a recorded baseline to catch coupling regressions, exports the graph to DOT/Mermaid, and recommends forward declarations as deterministic, actionable reports.
+Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, reports the reverse blast radius of changing a header, diffs a tree against a recorded baseline to catch coupling regressions, exports the graph to DOT/Mermaid, honours `.knotignore` rules for generated or vendor code, and recommends forward declarations as deterministic, actionable reports.
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
@@ -47,6 +47,12 @@ knot demo
 knot help | knot --help | knot --version
 ```
 
+A `.knotignore` file at the scan root is applied automatically; use
+`--ignore <file>` for another rule file. Rules support `#` comments, `*` and
+`?` (no `/` crossing), `**` (crosses `/`), directory rules like `vendor/`,
+and `!` negation (last match wins). `.git/`, `.aikit/`, `node_modules/` and
+`build/` are ignored by default and can be re-included with `!`.
+
 CI flags exit `1` on a finding: `--fail-on-cycle`, `--fail-on-cost N`,
 `--fail-on-hotspot N`, `--fail-on-regression`. A baseline is any
 `knot scan <dir> --format json` report saved to a file.
@@ -76,8 +82,8 @@ Recommendations (3):
 - **Explicit state machines**: the include lexer (15 states), the iterative DFS
   cycle detector (white/gray/black marks + frame stack), the identifier scanner,
   the transitive-cost worklist, the BFS path search (`path_step`), the reverse
-  impact BFS (`impact_step`) and the JSON lexer (`json_lex_step`). No hidden
-  recursion drives analysis state.
+  impact BFS (`impact_step`), the JSON lexer (`json_lex_step`) and the glob
+  matcher (`glob_step`). No hidden recursion drives analysis state.
 - **Pure snapshot diff**: `render_json` output parses back through `parse_json`
   into the same `Snapshot` (property test), and `diff_snapshots` reports added
   cycles, cost/hotspot changes and recommendation changes deterministically.
@@ -87,8 +93,11 @@ Recommendations (3):
 - **Reverse impact and export**: `reverse_graph` + `impact_step` compute the
   sorted set of nodes that transitively include a header; `render_dot` and
   `render_mermaid` emit stable, escaped graph documents.
+- **Ignore rules**: `parse_ignore` and `is_ignored` are pure; the filesystem
+  walker applies them to paths relative to the scan root, so one rule set is
+  shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 133 checks cover comments, strings, malformed directives,
+  their outputs; 146 checks cover comments, strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 
@@ -132,6 +141,8 @@ knot/
 ├── src/core/impact.cpp       <- reverse_graph, impact_step, renderers
 ├── src/core/export.hpp       <- DOT/Mermaid export declarations
 ├── src/core/export.cpp       <- pure, escaped graph renderers
+├── src/core/ignore.hpp       <- glob and ignore-rule declarations
+├── src/core/ignore.cpp       <- glob_step, parse_ignore, is_ignored
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration

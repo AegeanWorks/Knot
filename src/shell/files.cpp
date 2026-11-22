@@ -27,8 +27,7 @@ bool is_source(const std::string& path) {
 bool is_skipped(const fs::path& path) {
     for (const auto& part : path) {
         std::string name = part.string();
-        if (name == ".git" || name == "build" || name == "node_modules" ||
-            name == ".aikit") {
+        if (name == ".git" || name == ".aikit") {
             return true;
         }
     }
@@ -52,7 +51,13 @@ std::string normalise(fs::path path) {
 
 }  // namespace
 
-bool load_sources(const std::string& root, std::vector<knot::core::SourceDoc>& out) {
+bool file_exists(const std::string& path) {
+    std::error_code ec;
+    return fs::is_regular_file(path, ec);
+}
+
+bool load_sources(const std::string& root, const knot::core::IgnoreRules& rules,
+                  std::vector<knot::core::SourceDoc>& out) {
     std::error_code ec;
     if (!fs::is_directory(root, ec)) return false;
 
@@ -61,7 +66,11 @@ bool load_sources(const std::string& root, std::vector<knot::core::SourceDoc>& o
          end; it != end && !ec; it.increment(ec)) {
         if (is_skipped(it->path())) continue;
         if (!it->is_regular_file(ec)) continue;
-        if (is_source(it->path().string())) paths.push_back(it->path());
+        if (!is_source(it->path().string())) continue;
+        std::string relative = fs::relative(it->path(), root, ec).generic_string();
+        if (ec) return false;
+        if (knot::core::is_ignored(rules, relative)) continue;
+        paths.push_back(it->path());
     }
     if (ec) return false;
     std::sort(paths.begin(), paths.end());

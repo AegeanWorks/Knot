@@ -14,6 +14,7 @@ struct Command {
     std::string target;
     std::string from;
     std::string baseline;
+    std::string ignore_file;
     std::string format = "text";
     std::size_t top = 10;
     std::size_t fail_cost = 0;

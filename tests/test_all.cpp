@@ -7,6 +7,7 @@
 #include "core/export.hpp"
 #include "core/graph.hpp"
 #include "core/impact.hpp"
+#include "core/ignore.hpp"
 #include "core/json.hpp"
 #include "core/lexer.hpp"
 #include "core/path.hpp"
@@ -405,6 +406,39 @@ void test_cli_wave3() {
     CHECK(i.kind == CommandKind::Impact && i.target == "core.hpp" && i.error.empty());
 }
 
+void test_ignore_rules() {
+    IgnoreRules rules = parse_ignore(
+        "# generated\nbuild/\n*.pb.h\nthird_party/**\n!third_party/keep.h\n");
+    CHECK(rules.size() == 4);
+    CHECK(is_ignored(rules, "build/gen.cpp"));
+    CHECK(is_ignored(rules, "src/lib/a.pb.h"));
+    CHECK(is_ignored(rules, "third_party/foo/bar.hpp"));
+    CHECK(!is_ignored(rules, "third_party/keep.h"));
+    CHECK(!is_ignored(rules, "src/main.cpp"));
+
+    CHECK(glob_match("*.hpp", "a.hpp"));
+    CHECK(!glob_match("*.hpp", "dir/a.hpp"));
+    CHECK(glob_match("**/a.hpp", "dir/a.hpp"));
+    CHECK(!glob_match("a?b", "ac/b"));
+    CHECK(glob_match("a?b", "acb"));
+    GlobState s;
+    int steps = 0;
+    while (!s.matched && !s.failed && steps++ < 100) s = glob_step(s, "**/a.hpp", "dir/a.hpp");
+    CHECK(s.matched && steps < 100);
+}
+
+void test_cli_ignore() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* scan = const_cast<char*>("scan");
+    char* dir = const_cast<char*>("src");
+    char* ignore = const_cast<char*>("--ignore");
+    char* file = const_cast<char*>(".knotignore");
+    char* argv[] = {argv0, scan, dir, ignore, file};
+    Command c = parse_args(5, argv);
+    CHECK(c.kind == CommandKind::Scan && c.ignore_file == ".knotignore" && c.error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -429,6 +463,8 @@ int main() {
     test_impact();
     test_export();
     test_cli_wave3();
+    test_ignore_rules();
+    test_cli_ignore();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

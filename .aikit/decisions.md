@@ -32,3 +32,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: Maintainers need the blast radius of a header change and a reviewable picture of coupling; the user asked for continued autonomous features under the same architectural constraints.
 - **Decision**: reverse_graph plus an explicit impact_step BFS compute the sorted set of nodes that transitively include a target; render_dot and render_mermaid emit deterministic, escaped graph documents. Both live in the pure core; the shell only loads sources, resolves the user's node name and writes the result.
 - **Consequences**: Impact sets and exports are reproducible enough to attach to CI artifacts and documentation; 18 new checks cover reverse BFS, escaping and format validation; no new dependency or I/O path was introduced.
+
+### ADR-004: Add .knotignore rules at the filesystem edge
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: Scans of real repositories included generated and vendored code because the skip list was hardcoded; there was no way to scope an analysis to owned code.
+- **Decision**: A pure glob_step state machine supports '*', '?', '**', directory rules and '!' negation with last-match-wins semantics; parse_ignore/is_ignored live in the core, while files.cpp applies them to paths relative to the scan root. Defaults (.git/, .aikit/, node_modules/, build/) are rules and can be negated.
+- **Consequences**: Every subcommand now sees the same scoped tree; a fixture smoke test showed three files without the rule file and two with it; 13 new checks cover glob semantics and negation; no third-party dependency was added.
