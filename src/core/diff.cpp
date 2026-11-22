@@ -253,8 +253,14 @@ std::string render_diff_json(const DiffReport& diff) {
         if (i) os << ",";
         os << "\n    {\"kind\": \"" << kind_name(entry.kind) << "\", \"subject\": \"";
         for (char c : entry.subject) {
-            if (c == '"' || c == '\\') os << '\\' << c;
-            else os << c;
+            switch (c) {
+                case '"': os << "\\\""; break;
+                case '\\': os << "\\\\"; break;
+                case '\n': os << "\\n"; break;
+                case '\r': os << "\\r"; break;
+                case '\t': os << "\\t"; break;
+                default: os << c; break;
+            }
         }
         os << "\", \"before\": " << entry.before << ", \"after\": " << entry.after << "}";
     }

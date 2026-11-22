@@ -70,11 +70,25 @@ std::string render_impact_text(const std::string& target,
 
 std::string render_impact_json(const std::string& target,
                                const std::vector<std::string>& impacted) {
+    auto escape = [](const std::string& value) {
+        std::string out;
+        for (char c : value) {
+            switch (c) {
+                case '"': out += "\\\""; break;
+                case '\\': out += "\\\\"; break;
+                case '\n': out += "\\n"; break;
+                case '\r': out += "\\r"; break;
+                case '\t': out += "\\t"; break;
+                default: out.push_back(c); break;
+            }
+        }
+        return out;
+    };
     std::ostringstream os;
-    os << "{\n  \"schema\": 1,\n  \"target\": \"" << target << "\",\n  \"impact\": [";
+    os << "{\n  \"schema\": 1,\n  \"target\": \"" << escape(target) << "\",\n  \"impact\": [";
     for (std::size_t i = 0; i < impacted.size(); ++i) {
         if (i) os << ", ";
-        os << "\"" << impacted[i] << "\"";
+        os << "\"" << escape(impacted[i]) << "\"";
     }
     os << "]\n}\n";
     return os.str();

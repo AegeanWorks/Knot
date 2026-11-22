@@ -291,6 +291,11 @@ void test_diff() {
     CHECK(better.entries[0].kind == DiffEntry::Kind::CostDown);
     CHECK(render_diff_text(better).find("[cost-down] app.cpp : 3 -> 1") != std::string::npos);
     CHECK(render_diff_json(growth).find("\"regression\": true") != std::string::npos);
+    DiffReport control_diff;
+    DiffEntry control_entry;
+    control_entry.subject = "a\nb\tc";
+    control_diff.entries.push_back(control_entry);
+    CHECK(parse_json(render_diff_json(control_diff)).ok);
 }
 
 void test_paths() {
@@ -306,6 +311,7 @@ void test_paths() {
     CHECK(shortest_path(g, "c.hpp", "app.cpp").empty());
     CHECK(render_path_text("c.hpp", p).find("app.cpp -> direct.hpp -> c.hpp") != std::string::npos);
     CHECK(render_path_json("c.hpp", p).find("\"path\": [") != std::string::npos);
+    CHECK(parse_json(render_path_json("a\"b", {"x\ny"})).ok);
 }
 
 void test_cli_extensions() {
@@ -372,6 +378,7 @@ void test_impact() {
     CHECK(s.done && steps < 100);
     CHECK(render_impact_text("core.hpp", affected).find("4 affected node(s)") != std::string::npos);
     CHECK(render_impact_json("core.hpp", affected).find("\"impact\": [") != std::string::npos);
+    CHECK(parse_json(render_impact_json("a\"b", {"x\ny"})).ok);
 }
 
 void test_export() {
@@ -484,6 +491,11 @@ void test_policy() {
     CHECK(with_regression[0].kind == ViolationKind::Regression);
     CHECK(render_violations_text(violations).find("violation(s)") != std::string::npos);
     CHECK(render_violations_json(with_regression).find("\"kind\": \"regression\"") != std::string::npos);
+    std::vector<Violation> control;
+    Violation raw;
+    raw.subject = "a\nb\tc";
+    control.push_back(raw);
+    CHECK(parse_json(render_violations_json(control)).ok);
 }
 
 void test_cli_policy() {
@@ -590,6 +602,9 @@ void test_stats() {
     CHECK(stats.deepest_chain == std::vector<std::string>({"app.cpp", "a.hpp", "b.hpp", "c.hpp"}));
     CHECK(render_stats_text(stats).find("3 internal, 1 external") != std::string::npos);
     CHECK(render_stats_json(stats).find("\"max_depth\": 3") != std::string::npos);
+    Stats escaped;
+    escaped.deepest_chain = {"dir/a\"b\\c.hpp"};
+    CHECK(parse_json(render_stats_json(escaped)).ok);
 }
 
 void test_short_names() {
@@ -617,6 +632,8 @@ void test_path_qualification() {
     CHECK(qualify_path("a", "src/x.cpp", false) == "src/x.cpp");
     CHECK(qualify_path("C:/work/a", "src/x.cpp", true) == "a/src/x.cpp");
     CHECK(qualify_path("a/", "x.cpp", true) == "a/x.cpp");
+    CHECK(qualify_path("a/src", "x.cpp", true, "a/src") == "a/src/x.cpp");
+    CHECK(qualify_path("b/src", "x.cpp", true, "b/src") == "b/src/x.cpp");
 }
 
 void test_cli_multi_root() {

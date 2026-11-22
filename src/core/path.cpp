@@ -121,11 +121,25 @@ std::string render_path_text(const std::string& target, const std::vector<std::s
 }
 
 std::string render_path_json(const std::string& target, const std::vector<std::string>& path) {
+    auto escape = [](const std::string& value) {
+        std::string out;
+        for (char c : value) {
+            switch (c) {
+                case '"': out += "\\\""; break;
+                case '\\': out += "\\\\"; break;
+                case '\n': out += "\\n"; break;
+                case '\r': out += "\\r"; break;
+                case '\t': out += "\\t"; break;
+                default: out.push_back(c); break;
+            }
+        }
+        return out;
+    };
     std::ostringstream os;
-    os << "{\n  \"schema\": 1,\n  \"target\": \"" << target << "\",\n  \"path\": [";
+    os << "{\n  \"schema\": 1,\n  \"target\": \"" << escape(target) << "\",\n  \"path\": [";
     for (std::size_t i = 0; i < path.size(); ++i) {
         if (i) os << ", ";
-        os << "\"" << path[i] << "\"";
+        os << "\"" << escape(path[i]) << "\"";
     }
     os << "]\n}\n";
     return os.str();
