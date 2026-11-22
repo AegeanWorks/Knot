@@ -9,3 +9,5 @@ Persisted state carries a format version. A loader refuses a version it does not
 without modifying or quarantining that file; older versions migrate when a migration exists.
 
 ## Rules
+- **G-001** (user): Implementation language is C++17 only; no other implementation language and no third-party dependencies.
+- **G-002** (user): Architecture is a hard constraint: Functional Core with no I/O, Imperative Shell that owns all I/O at the edges, and all stateful behavior expressed as explicit state machines (enum + pure transition function). Verified by tests.

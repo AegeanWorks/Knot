@@ -8,3 +8,6 @@
 __pycache__/
 *.py[cod]
 node_modules/
+
+# Generated C++ binaries
+build/

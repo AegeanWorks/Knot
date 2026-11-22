@@ -6,13 +6,69 @@ Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parse
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
-- **Runtime Prerequisites**: <FILL: each runtime this project needs and its minimum version>
+- **Runtime Prerequisites**: C++17 toolchain — GNU g++ 12 or newer, MSVC 19.30 or newer, or Clang 14 or newer. Verified on MinGW g++ 16.2. No third-party libraries.
 - **Canonical Regression Shield Gate**:
   ```bash
-  scripts\\test.cmd
+  scripts\test.cmd
   ```
 
+### What it does
+
+Point Knot at a C/C++ tree and it answers three questions a compiler will not
+tell you directly:
+
+1. Which headers form an include cycle? (`cycles`)
+2. How expensive is each file — how many distinct headers does it pull in? (`scan`, cost column)
+3. Which headers are included far too often, and which includes could become a
+   forward declaration? (`hotspots`, `scan`, recommendations)
+
+Output is deterministic: input documents are sorted by path, graph nodes and
+recommendations are sorted by stable keys, and the JSON schema is versioned.
+The same tree always produces the same report, so Knot can be a CI gate.
+
+### Usage
+
+```text
+knot scan <dir> [--format text|json] [--top N] [--fail-on-cycle]
+knot cycles <dir> [--format text|json]
+knot hotspots <dir> [--format text|json] [--top N]
+knot demo
+knot help | knot --help | knot --version
+```
+
+`--fail-on-cycle` exits `1` when a cycle is found, otherwise `0`.
+Exit codes: `0` clean, `1` finding, `2` usage error, `3` I/O error.
+
+```text
+$ knot demo
+Knot: 3 file(s), 5 include(s), 4 node(s)
+Cycles: 1
+theme.hpp -> widget.hpp -> theme.hpp
+...
+Recommendations (3):
+  [break-cycle] widget.hpp -> theme.hpp : closes an include cycle
+  [remove-duplicate] app.cpp -> widget.hpp : included 2 times
+  [forward-declare] app.cpp -> widget.hpp : Widget is used only as pointer or reference
+```
+
+### Architecture (hard constraints)
+
+- **Functional core** (`src/core/`): pure C++17. No file, console, clock or
+  network access. `lex_step`, `dfs_step` and `ident_step` are value-in,
+  value-out transition functions folded by `scan_includes`, `find_cycles` and
+  `scan_identifiers`. `analyze` maps source documents to an immutable `Analysis`.
+- **Imperative shell** (`src/shell/`): owns the only I/O boundary in
+  `files.cpp` and the CLI decoder in `cli.cpp`. `main.cpp` parses, reads at the
+  edge, calls the pure core, and writes at the edge.
+- **Explicit state machines**: the include lexer (15 states), the iterative DFS
+  cycle detector (white/gray/black marks + frame stack), the identifier scanner,
+  and the transitive-cost worklist. No hidden recursion drives analysis state.
+- Tests in `tests/test_all.cpp` call the transition functions directly and pin
+  their outputs; 74 checks cover comments, strings, malformed directives,
+  self/2/3-node cycles, duplicate recommendations, JSON escaping and CLI errors.
+
 ### 🛠️ AIKit Commands (run from the AIKit folder)
+
 | Role | Command |
 |---|---|
 | Status, task and gates | `python aikit.py status knot` |
@@ -31,8 +87,25 @@ knot/
 ├── LICENSES/                 <- REUSE license texts
 ├── REUSE.toml                <- Machine-readable SPDX metadata
 ├── README.md
-├── inventory.py              <- AI-compat inventory: kind|name|locator lines (ADR-315)
-├── demo.py                   <- AI-compat scripted drive: WORLD-DELTA lines (ADR-315)
+├── src/                      <- C++17 implementation: pure core + shell
+├── scripts/                  <- build and test entry points
+├── tests/                    <- zero-dependency test harness
+├── src/core/types.hpp        <- immutable value types (pure)
+├── src/core/lexer.hpp        <- 15-state include lexer declaration
+├── src/core/lexer.cpp        <- lex_step transition + fold
+├── src/core/graph.hpp        <- graph and state-machine declarations
+├── src/core/graph.cpp        <- DFS, cost, fan-in, heuristic transitions
+├── src/core/report.hpp       <- analyze() and renderer declarations
+├── src/core/report.cpp       <- pure text/JSON renderers
+├── src/shell/cli.hpp         <- CLI decoder declaration
+├── src/shell/cli.cpp         <- pure argv decoding
+├── src/shell/files.hpp       <- I/O boundary declaration
+├── src/shell/files.cpp       <- file reads, demo fixture, stdout writes
+├── src/shell/main.cpp        <- imperative wiring and exit codes
+├── scripts/test.cmd          <- canonical regression gate (build + tests + demo)
+├── tests/test_all.cpp        <- zero-dependency test harness, 74 checks
+├── inventory.py              <- AIKit compat scaffold (ADR-315), not implementation
+├── demo.py                   <- AIKit compat scaffold (ADR-315), not implementation
 └── .aikit/                   <- this project's memory: record, ledger, decisions
 ```
 
