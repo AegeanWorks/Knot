@@ -6,7 +6,7 @@
 
 namespace knot::shell {
 
-enum class CommandKind { Scan, Cycles, Hotspots, Why, Diff, Impact, Graph, Check, Demo, Help, Version };
+enum class CommandKind { Scan, Cycles, Hotspots, Why, Diff, Impact, Graph, Check, Init, Demo, Help, Version };
 
 struct Command {
     CommandKind kind = CommandKind::Help;
@@ -22,6 +22,7 @@ struct Command {
     std::size_t fail_hotspot = 0;
     bool fail_on_cycle = false;
     bool fail_on_regression = false;
+    bool force = false;
     std::string error;
 };
 

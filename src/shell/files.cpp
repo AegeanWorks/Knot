@@ -56,6 +56,13 @@ bool file_exists(const std::string& path) {
     return fs::is_regular_file(path, ec);
 }
 
+bool write_text_file(const std::string& path, const std::string& text) {
+    std::ofstream out(fs::path(path), std::ios::binary | std::ios::trunc);
+    if (!out) return false;
+    out.write(text.data(), static_cast<std::streamsize>(text.size()));
+    return static_cast<bool>(out);
+}
+
 bool load_sources(const std::string& root, const knot::core::IgnoreRules& rules,
                   std::vector<knot::core::SourceDoc>& out) {
     std::error_code ec;

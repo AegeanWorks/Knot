@@ -17,6 +17,7 @@ bool load_sources(const std::string& root, const knot::core::IgnoreRules& rules,
 // Read a baseline report from disk. The only file read outside load_sources.
 bool read_text_file(const std::string& path, std::string& text);
 bool file_exists(const std::string& path);
+bool write_text_file(const std::string& path, const std::string& text);
 
 // A built-in fixture used by `knot demo`; no file system access.
 std::vector<knot::core::SourceDoc> demo_docs();

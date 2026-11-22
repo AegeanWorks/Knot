@@ -31,6 +31,7 @@ std::string usage_text() {
            "  knot impact <dir> <header> [--format text|json]\n"
            "  knot graph <dir> [--format dot|mermaid]\n"
            "  knot check <dir> [--policy <file>] [--format text|json]\n"
+           "  knot init <dir> [--force]\n"
            "  knot diff --baseline <file> --current <dir> [--format text|json]\n"
            "                  [--fail-on-regression]\n"
            "  knot demo\n"
@@ -66,6 +67,7 @@ Command parse_args(int argc, char** argv) {
     else if (sub == "impact") cmd.kind = CommandKind::Impact;
     else if (sub == "graph") cmd.kind = CommandKind::Graph;
     else if (sub == "check") cmd.kind = CommandKind::Check;
+    else if (sub == "init") cmd.kind = CommandKind::Init;
     else {
         cmd.error = "unknown subcommand: " + sub;
         return cmd;
@@ -91,6 +93,8 @@ Command parse_args(int argc, char** argv) {
             cmd.fail_on_cycle = true;
         } else if (flag == "--fail-on-regression") {
             cmd.fail_on_regression = true;
+        } else if (flag == "--force") {
+            cmd.force = true;
         } else if (flag == "--format" || flag == "--top" || flag == "--from" ||
                    flag == "--baseline" || flag == "--current" || flag == "--ignore" ||
                    flag == "--policy" ||

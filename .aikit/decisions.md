@@ -53,3 +53,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: Using a type whose header is not included is a common C++ error that surfaces far from its cause; Knot already has the identifier scanner and path query needed to flag it.
 - **Decision**: missing_includes is a pure function that compares identifiers used in a translation unit with type names derived from scanned headers, and emits an advisory add-include recommendation when the defining header is not reachable from that unit. It is advisory: unlike cycles it is not a policy violation by default.
 - **Consequences**: A fixture with 'Widget w;' and no include produced one add-include line; adding the include removed it; five new checks bring the suite to 164. Candidates are restricted to scanned headers and exact identifier matches to limit false positives.
+
+### ADR-007: Add knot init onboarding scaffold
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: New users had to learn the policy and ignore syntax before getting a useful result; the project brief requires zero-friction onboarding.
+- **Decision**: Pure generators produce starter .knotignore and .knot-policy content; the shell writes them at the I/O edge and refuses to overwrite without --force.
+- **Consequences**: One command produces an editable, documented starting configuration; a temp-directory smoke showed exit 0 on first run, exit 2 on a second run without --force and exit 0 with it; four new checks bring the suite to 168.

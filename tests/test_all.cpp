@@ -14,6 +14,7 @@
 #include "core/path.hpp"
 #include "core/policy.hpp"
 #include "core/report.hpp"
+#include "core/scaffold.hpp"
 #include "shell/cli.hpp"
 
 namespace {
@@ -519,6 +520,26 @@ void test_missing_includes() {
     CHECK(missing_includes(a).size() == 1);
 }
 
+void test_scaffold() {
+    std::string ignore_text = default_ignore_text();
+    std::string policy_text = default_policy_text();
+    CHECK(ignore_text.find("build/") != std::string::npos);
+    CHECK(parse_ignore(ignore_text).size() >= 3);
+    Policy policy = parse_policy(policy_text);
+    CHECK(policy.fail_on_cycle && policy.max_cost == 0 && policy.baseline.empty());
+}
+
+void test_cli_init() {
+    using namespace knot::shell;
+    char* argv0 = const_cast<char*>("knot");
+    char* init = const_cast<char*>("init");
+    char* dir = const_cast<char*>("src");
+    char* force = const_cast<char*>("--force");
+    char* argv[] = {argv0, init, dir, force};
+    Command c = parse_args(4, argv);
+    CHECK(c.kind == CommandKind::Init && c.force && c.root == "src" && c.error.empty());
+}
+
 }  // namespace
 
 int main() {
@@ -548,6 +569,8 @@ int main() {
     test_policy();
     test_cli_policy();
     test_missing_includes();
+    test_scaffold();
+    test_cli_init();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

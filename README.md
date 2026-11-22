@@ -46,6 +46,7 @@ knot why <dir> <header> [--from <file>] [--format text|json]
 knot impact <dir> <header> [--format text|json]
 knot graph <dir> [--format dot|mermaid]
 knot check <dir> [--policy <file>] [--format text|json]
+knot init <dir> [--force]
 knot diff --baseline <file> --current <dir> [--format text|json]
                   [--fail-on-regression]
 knot demo
@@ -57,6 +58,9 @@ A `.knotignore` file at the scan root is applied automatically; use
 `?` (no `/` crossing), `**` (crosses `/`), directory rules like `vendor/`,
 and `!` negation (last match wins). `.git/`, `.aikit/`, `node_modules/` and
 `build/` are ignored by default and can be re-included with `!`.
+
+`knot init <dir>` writes starter `.knotignore` and `.knot-policy` files; it
+refuses to overwrite existing ones unless `--force` is given.
 
 `knot check` applies a repository-owned `.knot-policy` with the keys
 `fail_on_cycle`, `max_cost`, `max_hotspot` and `baseline` (`key = value` per
@@ -110,7 +114,7 @@ Recommendations (3):
   walker applies them to paths relative to the scan root, so one rule set is
   shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 164 checks cover comments, strings, malformed directives,
+  their outputs; 168 checks cover comments, strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 
@@ -160,6 +164,8 @@ knot/
 ├── src/core/policy.cpp       <- pure policy parser and evaluator
 ├── src/core/missing.hpp      <- missing-include advisory declarations
 ├── src/core/missing.cpp      <- pure used-type / header reachability check
+├── src/core/scaffold.hpp     <- starter configuration generators
+├── src/core/scaffold.cpp     <- pure .knotignore/.knot-policy content
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration

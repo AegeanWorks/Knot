@@ -10,6 +10,7 @@
 #include "core/path.hpp"
 #include "core/policy.hpp"
 #include "core/report.hpp"
+#include "core/scaffold.hpp"
 #include "files.hpp"
 
 namespace {
@@ -111,6 +112,24 @@ int main(int argc, char** argv) {
 
     // I/O stops here. Everything below is pure computation.
     const knot::core::Analysis analysis = knot::core::analyze(std::move(docs));
+
+    if (cmd.kind == knot::shell::CommandKind::Init) {
+        const std::string ignore_path = cmd.root + "/.knotignore";
+        const std::string policy_path = cmd.root + "/.knot-policy";
+        if (!cmd.force && (knot::shell::file_exists(ignore_path) ||
+                           knot::shell::file_exists(policy_path))) {
+            knot::shell::write_stderr(
+                "knot: configuration already exists; pass --force to overwrite\n");
+            return 2;
+        }
+        if (!knot::shell::write_text_file(ignore_path, knot::core::default_ignore_text()) ||
+            !knot::shell::write_text_file(policy_path, knot::core::default_policy_text())) {
+            knot::shell::write_stderr("knot: cannot write configuration in " + cmd.root + "\n");
+            return 3;
+        }
+        knot::shell::write_stdout("knot: wrote .knotignore and .knot-policy\n");
+        return 0;
+    }
 
     if (cmd.kind == knot::shell::CommandKind::Check) {
         const knot::core::Policy policy = load_policy(cmd);
