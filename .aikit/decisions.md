@@ -46,3 +46,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: CI runners previously had to remember a changing set of CLI flags, so a project's coupling policy was not versioned with its code.
 - **Decision**: A pure parse_policy/evaluate_policy model reads a small key=value .knot-policy file and produces a sorted violation list; 'knot check <dir>' applies it together with the ignore rules and an optional baseline, exiting 1 on any violation.
 - **Consequences**: One stable CI command with a versioned policy; a fixture with a two-header cycle produced one violation and exit 1, while a clean tree produced zero and exit 0; 13 new checks bring the suite to 159; no new dependency or I/O path was introduced.
+
+### ADR-006: Add advisory missing-include detection
+- **Date**: 2026-11-22
+- **Status**: Accepted
+- **Context**: Using a type whose header is not included is a common C++ error that surfaces far from its cause; Knot already has the identifier scanner and path query needed to flag it.
+- **Decision**: missing_includes is a pure function that compares identifiers used in a translation unit with type names derived from scanned headers, and emits an advisory add-include recommendation when the defining header is not reachable from that unit. It is advisory: unlike cycles it is not a policy violation by default.
+- **Consequences**: A fixture with 'Widget w;' and no include produced one add-include line; adding the include removed it; five new checks bring the suite to 164. Candidates are restricted to scanned headers and exact identifier matches to limit false positives.

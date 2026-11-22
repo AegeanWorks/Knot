@@ -6,6 +6,7 @@
 
 #include "graph.hpp"
 #include "lexer.hpp"
+#include "missing.hpp"
 
 namespace knot::core {
 namespace {
@@ -79,6 +80,7 @@ const char* kind_name(Recommendation::Kind kind) {
         case Recommendation::Kind::BreakCycle: return "break-cycle";
         case Recommendation::Kind::RemoveDuplicate: return "remove-duplicate";
         case Recommendation::Kind::ForwardDeclare: return "forward-declare";
+        case Recommendation::Kind::AddInclude: return "add-include";
     }
     return "unknown";
 }
@@ -103,6 +105,15 @@ Analysis analyze(std::vector<SourceDoc> docs) {
     a.costs = transitive_costs(a.graph);
     a.hotspots = fan_in(a.graph);
     a.recommendations = recommendations(a.graph, a.edges, docs, a.cycles);
+    std::vector<Recommendation> missing = missing_includes(a);
+    a.recommendations.insert(a.recommendations.end(), missing.begin(), missing.end());
+    std::sort(a.recommendations.begin(), a.recommendations.end(),
+              [](const Recommendation& x, const Recommendation& y) {
+                  if (x.kind != y.kind) return x.kind < y.kind;
+                  if (x.file != y.file) return x.file < y.file;
+                  if (x.header != y.header) return x.header < y.header;
+                  return x.reason < y.reason;
+              });
     return a;
 }
 

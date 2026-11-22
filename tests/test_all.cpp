@@ -8,6 +8,7 @@
 #include "core/graph.hpp"
 #include "core/impact.hpp"
 #include "core/ignore.hpp"
+#include "core/missing.hpp"
 #include "core/json.hpp"
 #include "core/lexer.hpp"
 #include "core/path.hpp"
@@ -492,6 +493,32 @@ void test_cli_policy() {
     CHECK(c.kind == CommandKind::Check && c.policy_file == ".knot-policy" && c.error.empty());
 }
 
+void test_missing_includes() {
+    std::vector<SourceDoc> missing{
+        {"widget.hpp", "struct Widget {};\n"},
+        {"app.cpp", "Widget w;\n"}};
+    Analysis a = analyze(missing);
+    bool found = false;
+    for (const auto& rec : a.recommendations) {
+        if (rec.kind == Recommendation::Kind::AddInclude) {
+            found = true;
+            CHECK(rec.file == "app.cpp" && rec.header == "widget.hpp");
+        }
+    }
+    CHECK(found);
+    CHECK(render_text(a, 5).find("[add-include]") != std::string::npos);
+
+    std::vector<SourceDoc> included{
+        {"widget.hpp", "struct Widget {};\n"},
+        {"app.cpp", "#include \"widget.hpp\"\nWidget w;\n"}};
+    Analysis b = analyze(included);
+    for (const auto& rec : b.recommendations) {
+        CHECK(rec.kind != Recommendation::Kind::AddInclude);
+    }
+    CHECK(missing_includes(b).empty());
+    CHECK(missing_includes(a).size() == 1);
+}
+
 }  // namespace
 
 int main() {
@@ -520,6 +547,7 @@ int main() {
     test_cli_ignore();
     test_policy();
     test_cli_policy();
+    test_missing_includes();
     std::cout << "knot: " << checks << " checks, " << failures << " failures\n";
     return failures == 0 ? 0 : 1;
 }

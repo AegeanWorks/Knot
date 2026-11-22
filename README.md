@@ -2,7 +2,7 @@
 
 [![Built with AIKit](https://img.shields.io/badge/built%20with-AIKit-6f42c1)](https://github.com/AegeanWorks/AIKit)
 
-Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, reports the reverse blast radius of changing a header, diffs a tree against a recorded baseline to catch coupling regressions, exports the graph to DOT/Mermaid, honours `.knotignore` rules for generated or vendor code, enforces a repository-owned policy with `knot check`, and recommends forward declarations as deterministic, actionable reports.
+Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parses include directives with an explicit state machine, detects cycles, quantifies transitive header cost, traces the exact include chain that pulls a header in, reports the reverse blast radius of changing a header, diffs a tree against a recorded baseline to catch coupling regressions, exports the graph to DOT/Mermaid, honours `.knotignore` rules for generated or vendor code, enforces a repository-owned policy with `knot check`, flags used types whose header is not included, and recommends forward declarations as deterministic, actionable reports.
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
@@ -14,7 +14,7 @@ Knot is a zero-dependency C++17 include-graph analyzer for programmers: it parse
 
 ### What it does
 
-Point Knot at a C/C++ tree and it answers eight questions a compiler will not
+Point Knot at a C/C++ tree and it answers nine questions a compiler will not
 tell you directly:
 
 1. Which headers form an include cycle? (`cycles`)
@@ -28,6 +28,8 @@ tell you directly:
 7. Can I review the whole graph as a picture? (`graph --format dot|mermaid`)
 8. Does the tree satisfy my project's coupling policy? (`knot check`, driven by
    an in-repository `.knot-policy`)
+9. Did I forget to include the header that defines a type I used? (`scan`,
+   advisory `add-include` recommendations)
 
 Output is deterministic: input documents are sorted by path, graph nodes and
 recommendations are sorted by stable keys, and the JSON schema is versioned.
@@ -92,7 +94,9 @@ Recommendations (3):
   the transitive-cost worklist, the BFS path search (`path_step`), the reverse
   impact BFS (`impact_step`), the JSON lexer (`json_lex_step`) and the glob
   matcher (`glob_step`) and the policy evaluator (`parse_policy`,
-  `evaluate_policy`). No hidden recursion drives analysis state.
+  `evaluate_policy`). `missing_includes` reuses the identifier scanner and the
+  path query to flag a used type whose header is not reachable. No hidden
+  recursion drives analysis state.
 - **Pure snapshot diff**: `render_json` output parses back through `parse_json`
   into the same `Snapshot` (property test), and `diff_snapshots` reports added
   cycles, cost/hotspot changes and recommendation changes deterministically.
@@ -106,7 +110,7 @@ Recommendations (3):
   walker applies them to paths relative to the scan root, so one rule set is
   shared by every subcommand.
 - Tests in `tests/test_all.cpp` call the transition functions directly and pin
-  their outputs; 159 checks cover comments, strings, malformed directives,
+  their outputs; 164 checks cover comments, strings, malformed directives,
   self/2/3-node cycles, duplicate recommendations, JSON escaping, snapshot
   round-trips, path queries, regression verdicts and CLI errors.
 
@@ -154,6 +158,8 @@ knot/
 ├── src/core/ignore.cpp       <- glob_step, parse_ignore, is_ignored
 ├── src/core/policy.hpp       <- CI policy and violation declarations
 ├── src/core/policy.cpp       <- pure policy parser and evaluator
+├── src/core/missing.hpp      <- missing-include advisory declarations
+├── src/core/missing.cpp      <- pure used-type / header reachability check
 ├── src/shell/cli.hpp         <- CLI decoder declaration
 ├── src/shell/cli.cpp         <- pure argv decoding
 ├── src/shell/files.hpp       <- I/O boundary declaration

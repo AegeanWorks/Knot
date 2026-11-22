@@ -46,7 +46,7 @@ struct Hotspot {
 };
 
 struct Recommendation {
-    enum class Kind { BreakCycle, RemoveDuplicate, ForwardDeclare };
+    enum class Kind { BreakCycle, RemoveDuplicate, ForwardDeclare, AddInclude };
 
     Kind kind = Kind::RemoveDuplicate;
     std::string file;

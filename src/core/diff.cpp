@@ -26,6 +26,7 @@ std::string rec_key(const Recommendation& r) {
         case Recommendation::Kind::BreakCycle: kind = "break-cycle"; break;
         case Recommendation::Kind::RemoveDuplicate: kind = "remove-duplicate"; break;
         case Recommendation::Kind::ForwardDeclare: kind = "forward-declare"; break;
+        case Recommendation::Kind::AddInclude: kind = "add-include"; break;
     }
     return kind + "|" + r.file + "|" + r.header;
 }
@@ -102,6 +103,7 @@ bool snapshot_from_json(const std::string& text, Snapshot& out, std::string& err
             std::string kind = string_or(json_member(item, "kind"), "");
             if (kind == "break-cycle") r.kind = Recommendation::Kind::BreakCycle;
             else if (kind == "forward-declare") r.kind = Recommendation::Kind::ForwardDeclare;
+            else if (kind == "add-include") r.kind = Recommendation::Kind::AddInclude;
             else r.kind = Recommendation::Kind::RemoveDuplicate;
             r.file = string_or(json_member(item, "file"), "");
             r.header = string_or(json_member(item, "header"), "");
